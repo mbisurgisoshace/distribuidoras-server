@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Check if environment argument is passed
+ENVIRONMENT=$1
+if [[ -z $ENVIRONMENT ]]; then
+    echo Must specify an environment: dev, demo or production
+    exit 1
+fi
+
+# can pass: client or server as an option
+# if no option is pased, both are built
+OPTION=$2
+
+BASE_URL=$3
+
+# Set the frontend host based on the environment
+if [ "$ENVIRONMENT" == "bybgas" ]
+then
+  BASE_SERVICE_URL=http://bybgas.dyndns.org:3000
+  LATITUDE=-34.7000212
+  LONGITUDE=-58.5657113
+elif [ "$ENVIRONMENT" == "dimegas" ]
+then
+  BASE_SERVICE_URL=http://dimegas.engux.com.ar:3000
+  LATITUDE=-31.33813
+  LONGITUDE=-64.0735329
+elif [ "$ENVIRONMENT" == "dimegas-local" ]
+then
+  BASE_SERVICE_URL=http://192.168.0.25:3001
+  LATITUDE=-31.33813
+  LONGITUDE=-64.0735329
+elif [ "$ENVIRONMENT" == "centrogas" ]
+then
+  BASE_SERVICE_URL=http://192.168.0.25:3001
+  LATITUDE=-31.33813
+  LONGITUDE=-64.0735329
+else
+  echo Environment must be one of: dev, demo or production
+  exit 1
+fi
+
+if [ -z $OPTION ] || [ "$OPTION" == "client" ]; then
+  # Build the client
+  docker-compose run client /bin/bash -c "BASE_SERVICE_URL=$BASE_SERVICE_URL && LATITUDE=$LATITUDE && LONGITUDE=$LONGITUDE && yarn build"
+
+  # Client docker container
+  docker build -t distribuidoras-client:$ENVIRONMENT -f ../client/deploy.Dockerfile ../client
+  docker tag distribuidoras-client:$ENVIRONMENT repo.treescale.com/mbisurgi/distribuidoras-client:$ENVIRONMENT
+  docker push repo.treescale.com/mbisurgi/distribuidoras-client:$ENVIRONMENT
+fi
+
+if [ -z $OPTION ] || [ "$OPTION" == "server" ]; then
+  # Server docker container
+  docker build -t distribuidoras-server:$ENVIRONMENT -f ./deploy.Dockerfile .
+  docker tag distribuidoras-server:$ENVIRONMENT repo.treescale.com/mbisurgi/distribuidoras-server:$ENVIRONMENT
+  docker push repo.treescale.com/mbisurgi/distribuidoras-server:$ENVIRONMENT
+fi

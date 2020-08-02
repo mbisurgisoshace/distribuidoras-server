@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    image: distribuidoras_dev_server
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mssql://sa:maximati@bybgas.dyndns.org:1730/CRM_DEV
+    volumes:
+      - ./api-docs:/app/api-docs
+      - ./db_scripts:/app/db_scripts
+      - ./scripts:/app/scripts
+      - ./src:/app/src
+      - ./.env:/app/.env
+      - ./app.json:/app/app.json
+      - ./tsconfig.json:/app/tsconfig.json
+    command: yarn start
+  client:
+    build: ../client
+    image: distribuidoras_dev_client
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    environment:
+      BASE_SERVICE_URL: http://localhost:3000
+      LATITUDE: -34.8166867
+      LONGITUDE: -58.4774638
+    volumes:
+      - ../client/.env:/app/.env
+      - ../client/dist:/app/dist
+      - ../client/src:/app/src
+      - ../client/public:/app/public
+      - ../client/.babelrc:/app/.babelrc
+      - ../client/app.json:/app/app.json
+      - ../client/webpack.common.js:/app/webpack.common.js
+      - ../client/webpack.dev.js:/app/webpack.dev.js
+      - ../client/webpack.prod.js:/app/webpack.prod.js
+      - ../client/tsconfig.json:/app/tsconfig.json
+      - ../client/services.json:/app/services.json
+      - ../client/postcss.config.js:/app/postcss.config.js
+    command: yarn dev
