@@ -23,7 +23,7 @@ then
   LONGITUDE=-58.5657113
 elif [ "$ENVIRONMENT" == "dimegas" ]
 then
-  BASE_SERVICE_URL=http://dimegas.engux.com.ar:3000
+  BASE_SERVICE_URL=http://dimegas-web.engux.com.ar:3000
   LATITUDE=-31.33813
   LONGITUDE=-64.0735329
 elif [ "$ENVIRONMENT" == "dimegas-local" ]

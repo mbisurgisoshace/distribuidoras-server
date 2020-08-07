@@ -77,7 +77,21 @@ router.post('/pedidos', authHelpers.ensureAuthenticated, authHelpers.ensureIsUse
   try {
     const pedido = (await knex('PedidosComercios').insert(values, '*'))[0];
     AuditoriaService.log('pedidos_comercios', pedido.id, JSON.stringify(pedido), 'insert', req.user.username);
-    res.status(200).json(camelizeKeys(pedido));
+    res.status(200).json(pedido);
+  } catch (err) {
+    console.log('err', err);
+    next(err);
+  }
+});
+
+router.post('/stock', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const values: any = req.body;
+
+  try {
+    const stock = (await knex('StockComercios').insert(values, '*'))[0];
+    await createStockInterno(values[0].fecha, values[0].comprobante, values);
+    AuditoriaService.log('stock_comercios', stock.id, JSON.stringify(stock), 'insert', req.user.username);
+    res.status(200).json(stock);
   } catch (err) {
     console.log('err', err);
     next(err);
@@ -108,6 +122,28 @@ async function getStockComercio(comercio) {
 
     return s;
   });
+}
+
+async function createStockInterno(fecha, comprobante, items) {
+  let stock: any = {
+    Fecha: fecha,
+    TipoMovimiento: 'Reposicion Punto Entrega',
+    Modulo: 'Stock',
+    NroComprobante: comprobante
+  };
+
+  stock = (await knex('MovimientosStockEnc').insert(stock, '*'))[0];
+
+  if (stock) {
+    const stockItems = items.map(v => ({
+      MovimientoStockEncID: stock.MovimientoStockEncID,
+      EnvaseID: v.envase_id,
+      EstadoEnvaseID: 1,
+      Cantidad: v.cantidad * -1
+    }));
+
+    await knex('MovimientosStockDet').insert(stockItems, '*');
+  }
 }
 
 export default router;

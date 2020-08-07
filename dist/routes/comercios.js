@@ -77,7 +77,20 @@ router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default
     try {
         const pedido = (yield connection_1.default('PedidosComercios').insert(values, '*'))[0];
         AuditoriaService_1.default.log('pedidos_comercios', pedido.id, JSON.stringify(pedido), 'insert', req.user.username);
-        res.status(200).json(utils_1.camelizeKeys(pedido));
+        res.status(200).json(pedido);
+    }
+    catch (err) {
+        console.log('err', err);
+        next(err);
+    }
+}));
+router.post('/stock', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const values = req.body;
+    try {
+        const stock = (yield connection_1.default('StockComercios').insert(values, '*'))[0];
+        yield createStockInterno(values[0].fecha, values[0].comprobante, values);
+        AuditoriaService_1.default.log('stock_comercios', stock.id, JSON.stringify(stock), 'insert', req.user.username);
+        res.status(200).json(stock);
     }
     catch (err) {
         console.log('err', err);
@@ -105,6 +118,26 @@ function getStockComercio(comercio) {
             }
             return s;
         });
+    });
+}
+function createStockInterno(fecha, comprobante, items) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let stock = {
+            Fecha: fecha,
+            TipoMovimiento: 'Reposicion Punto Entrega',
+            Modulo: 'Stock',
+            NroComprobante: comprobante
+        };
+        stock = (yield connection_1.default('MovimientosStockEnc').insert(stock, '*'))[0];
+        if (stock) {
+            const stockItems = items.map(v => ({
+                MovimientoStockEncID: stock.MovimientoStockEncID,
+                EnvaseID: v.envase_id,
+                EstadoEnvaseID: 1,
+                Cantidad: v.cantidad * -1
+            }));
+            yield connection_1.default('MovimientosStockDet').insert(stockItems, '*');
+        }
     });
 }
 exports.default = router;
