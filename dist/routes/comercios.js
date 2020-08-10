@@ -8,8 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
 const R = require("ramda");
+const moment = require("moment");
+const express = require("express");
 const connection_1 = require("../db/connection");
 const helpers_1 = require("../auth/helpers");
 const utils_1 = require("../utils/utils");
@@ -72,6 +73,18 @@ router.put('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers
         next(err);
     }
 }));
+router.get('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const pedidos = yield connection_1.default('PedidosComercios')
+            .select('PedidosComercios.*', 'Comercios.razon_social', 'Comercios.calle', 'Comercios.altura', 'Comercios.telefono')
+            .innerJoin('Comercios', 'Comercios.id', 'PedidosComercios.comercio_id')
+            .where({ entregado: false });
+        res.status(200).json(utils_1.camelizeKeys(pedidos));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     const values = req.body;
     try {
@@ -81,6 +94,51 @@ router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default
     }
     catch (err) {
         console.log('err', err);
+        next(err);
+    }
+}));
+router.post('/pedidos/entregar', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const ids = req.body;
+    try {
+        const pedidos = yield connection_1.default('PedidosComercios').whereIn('id', ids);
+        yield Promise.all(pedidos.map((p) => __awaiter(this, void 0, void 0, function* () {
+            // Reducir stock punto de entrega
+            const items = yield connection_1.default('MovimientosDet').where({ MovimientoEncID: p.movimiento_enc_id });
+            const stock = items.map(i => ({
+                tipo: 'venta',
+                fecha: p.fecha,
+                envase_id: i.EnvaseID,
+                cantidad: i.Cantidad * -1,
+                comercio_id: p.comercio_id,
+                movimiento_enc_id: p.movimiento_enc_id
+            }));
+            yield connection_1.default('StockComercios').insert(stock, '*');
+            // Cambiar estado pedido a entregado
+            yield connection_1.default('MovimientosEnc')
+                .update({ EstadoMovimientoID: 3 }, '*')
+                .where({ MovimientoEncID: p.movimiento_enc_id });
+            // Si el pedido no fue pagado, generar movimiento cuenta corriente en punto de entrega
+            if (!p.pagado) {
+                const total = (yield connection_1.default('MovimientosDet')
+                    .sum('Monto as total')
+                    .where({ MovimientoEncID: p.movimiento_enc_id }))[0].total;
+                const ctacte = {
+                    tipo: 'credito',
+                    fecha: moment().format('YYYY-MM-DD'),
+                    monto: total,
+                    comercio_id: p.comercio_id,
+                    pedido_id: p.id,
+                };
+                yield connection_1.default('CuentaCorrienteComercios').insert(ctacte, '*');
+            }
+            // Cambiar el esatdo de la entrega a entregado
+            yield connection_1.default('PedidosComercios')
+                .update({ entregado: true }, '*')
+                .where({ id: p.id });
+        })));
+        res.status(200).json(utils_1.camelizeKeys(pedidos));
+    }
+    catch (err) {
         next(err);
     }
 }));
