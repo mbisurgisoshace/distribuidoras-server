@@ -60,4 +60,13 @@ router.delete('/:canal_id', authHelpers.ensureAuthenticated, authHelpers.ensureI
 	}
 });
 
+router.get('/subcanales', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+	try {
+		const subcanales = await knex('Subcanales').select('*');
+		res.status(200).json(camelizeKeys(subcanales));
+	} catch (err) {
+		next(err);
+	}
+});
+
 export default router;

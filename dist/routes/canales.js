@@ -64,5 +64,14 @@ router.delete('/:canal_id', helpers_1.default.ensureAuthenticated, helpers_1.def
         next(err);
     }
 }));
+router.get('/subcanales', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const subcanales = yield connection_1.default('Subcanales').select('*');
+        res.status(200).json(utils_1.camelizeKeys(subcanales));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 exports.default = router;
 //# sourceMappingURL=canales.js.map
