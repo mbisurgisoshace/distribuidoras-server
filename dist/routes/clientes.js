@@ -126,7 +126,33 @@ router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1
             res.status(200).json(lastPedido);
         }
         else {
-            res.status(400).json({ error: 'El cliente no tiene pedidos.' });
+            res.status(404).json({ error: 'El cliente no tiene pedidos.' });
+        }
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get('/:cliente_id/comodato', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const cliente_id = req.params.cliente_id;
+    try {
+        const comodato = yield connection_1.default('ComodatosEnc')
+            .where({ ClienteID: cliente_id, Vigente: true })
+            .first();
+        if (comodato) {
+            let items = yield connection_1.default('ComodatosDet')
+                .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
+                .where({ ComodatoEncID: comodato.ComodatoEncID })
+                .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto');
+            let lastComodato = {
+                fecha: comodato.Fecha,
+                comprobante: comodato.NroComprobante,
+                items: utils_1.camelizeKeys(items)
+            };
+            res.status(200).json(lastComodato);
+        }
+        else {
+            res.status(404).json({ error: 'El cliente no tiene comodatos.' });
         }
     }
     catch (err) {

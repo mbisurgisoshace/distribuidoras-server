@@ -9,3 +9,9 @@ module.exports = {
 // 	db_local: 'mssql://mbisurgi:maximati@181.230.140.99:4371/CRM',
 // 	db_dev: 'mssql://mbisurgi:maximati@181.230.140.99:4371/CRM'
 // };
+// module.exports = {
+// 	db_test: 'mssql://mbisurgi:Maximati@grasigas.dyndns.org:4333/CRM_NUEVO',
+// 	db_local: 'mssql://mbisurgi:Maximati@grasigas.dyndns.org:4333/CRM_NUEVO',
+// 	db_dev: 'mssql://mbisurgi:Maximati@grasigas.dyndns.org:4333/CRM_NUEVO'
+// };
+

@@ -21,6 +21,11 @@ then
   BASE_SERVICE_URL=http://bybgas.dyndns.org:3000
   LATITUDE=-34.7000212
   LONGITUDE=-58.5657113
+elif [ "$ENVIRONMENT" == "grasigas" ]
+then
+  BASE_SERVICE_URL=http://167.172.14.198:3000
+  LATITUDE=-29.402097
+  LONGITUDE=-66.8389388
 elif [ "$ENVIRONMENT" == "dimegas" ]
 then
   BASE_SERVICE_URL=http://dimegas-web.engux.com.ar:3000
