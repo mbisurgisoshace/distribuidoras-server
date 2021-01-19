@@ -7,7 +7,7 @@ import { camelizeKeys } from '../utils/utils';
 
 const router = express.Router();
 
-router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.get('/recuperados', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
   try {
     const startActualDate = moment().startOf('month').format('YYYY-MM-DD');
     const endActualDate = moment().endOf('month').format('YYYY-MM-DD');
@@ -57,6 +57,25 @@ router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async
     })
 
     res.status(200).json(clientes);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/comodatos_movimientos', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  try {
+    const movimientos = await knex('ComodatosMovimientos')
+      .select('Clientes.ClienteID as Cliente Id',
+        'Clientes.RazonSocial as Razon Social',
+        'ComodatosMovimientos.fecha as Fecha',
+        'ComodatosMovimientos.nro_comprobante as Comprobante',
+        'Envases.EnvaseNombre as Envase',
+        'ComodatosMovimientos.cantidad as Cantidad'
+        )
+      .innerJoin('Clientes', 'Clientes.ClienteID', 'ComodatosMovimientos.cliente_id')
+      .innerJoin('Envases', 'Envases.EnvaseID', 'ComodatosMovimientos.envase_id')
+
+    res.status(200).json(movimientos);
   } catch (err) {
     next(err);
   }

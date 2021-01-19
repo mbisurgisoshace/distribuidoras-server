@@ -13,7 +13,7 @@ const express = require("express");
 const connection_1 = require("../db/connection");
 const helpers_1 = require("../auth/helpers");
 const router = express.Router();
-router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/recuperados', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     try {
         const startActualDate = moment().startOf('month').format('YYYY-MM-DD');
         const endActualDate = moment().endOf('month').format('YYYY-MM-DD');
@@ -46,6 +46,18 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
             return Object.assign({}, c, { Condicion: nuevosIds.includes(c.Id) ? 'nuevo' : 'recuperado' });
         });
         res.status(200).json(clientes);
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get('/comodatos_movimientos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const movimientos = yield connection_1.default('ComodatosMovimientos')
+            .select('Clientes.ClienteID as Cliente Id', 'Clientes.RazonSocial as Razon Social', 'ComodatosMovimientos.fecha as Fecha', 'ComodatosMovimientos.nro_comprobante as Comprobante', 'Envases.EnvaseNombre as Envase', 'ComodatosMovimientos.cantidad as Cantidad')
+            .innerJoin('Clientes', 'Clientes.ClienteID', 'ComodatosMovimientos.cliente_id')
+            .innerJoin('Envases', 'Envases.EnvaseID', 'ComodatosMovimientos.envase_id');
+        res.status(200).json(movimientos);
     }
     catch (err) {
         next(err);

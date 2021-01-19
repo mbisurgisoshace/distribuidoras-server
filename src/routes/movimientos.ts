@@ -32,7 +32,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
         console.log('err', err);
         next(err);
     }
-})
+});
 
 router.post('/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
     const values: any = formatKeys(req.body);
@@ -44,6 +44,6 @@ router.post('/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.
         console.log('err', err);
         next(err);
     }
-})
+});
 
 export default router;

@@ -20,6 +20,7 @@ import choferes from './routes/choferes';
 import camiones from './routes/camiones';
 import feriados from './routes/feriados';
 import comercios from './routes/comercios';
+import comodatos from './routes/comodatos';
 import movimientos from './routes/movimientos';
 import tiposEnvase from './routes/tiposEnvase';
 import estadosEnvase from './routes/estadosEnvase';
@@ -72,6 +73,7 @@ class App {
 		this.express.use('/camiones', camiones);
 		this.express.use('/feriados', feriados);
 		this.express.use('/comercios', comercios);
+		this.express.use('/comodatos', comodatos);
 		this.express.use('/tiposEnvase', tiposEnvase);
 		this.express.use('/movimientos', movimientos);
 		this.express.use('/estadosEnvase', estadosEnvase);
