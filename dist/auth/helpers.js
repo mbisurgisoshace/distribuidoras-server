@@ -34,6 +34,23 @@ class AuthHelpers {
             }
         });
     }
+    static changePassword(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const salt = bcrypt.genSaltSync();
+            const hash = bcrypt.hashSync(req.body.password, salt);
+            const username = req.body.username;
+            try {
+                let user = yield connection_1.default('Users').where({ username: req.body.username }).first();
+                if (!user)
+                    return Promise.reject({ status: 404, message: 'El usuario no existe' });
+                user = yield connection_1.default('Users').update({ password: hash }).where({ username });
+                return user;
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
+    }
     static loginRequired(req, res, next) {
         if (!req.user)
             return res.status(401).json({ status: 'Por favor inicie sesion' });

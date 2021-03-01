@@ -46,28 +46,21 @@ router.post('/signup', async (req, res, next) => {
 	} catch (err) {
 		handleResponse(res, err.status || 500, { error: err.message || err });
 	}
+});
 
-	// return authHelpers
-	// 	.createUser(req)
-	// 	.then((user) => {
-	// 		return authHelpers.encodeToken(user[0]);
-	// 	})
-	// 	.then((token) => {
-	// 		passport.authenticate('local', (err, user, info) => {
-	// 			if (user) {
-	// 				const userObj = R.omit([ 'password', 'token' ], user);
+router.put('/change-password', async (req, res, next) => {
+	try {
+		const user = await authHelpers.changePassword(req);
 
-	// 				res.status(200).json({
-	// 					status: 'success',
-	// 					user: userObj,
-	// 					token: token
-	// 				});
-	// 			}
-	// 		})(req, res, next);
-	// 	})
-	// 	.catch((err) => {
-	// 		handleResponse(res, err.status || 500, { error: err.message || err });
-	// 	});
+		const userObj = R.omit([ 'password', 'token' ], user);
+
+		res.status(200).json({
+			status: 'success',
+			user: userObj,
+		});
+	} catch (err) {
+		handleResponse(res, err.status || 500, { error: err.message || err });
+	}
 });
 
 function handleResponse(res, code, statusMsg) {

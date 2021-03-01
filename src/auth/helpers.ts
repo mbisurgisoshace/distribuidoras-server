@@ -28,6 +28,24 @@ export default class AuthHelpers {
 		}
 	}
 
+	public static async changePassword(req) {
+		const salt = bcrypt.genSaltSync();
+		const hash = bcrypt.hashSync(req.body.password, salt);
+		const username = req.body.username;
+
+		try {
+			let user = await knex('Users').where({ username: req.body.username }).first();
+
+			if (!user) return Promise.reject({ status: 404, message: 'El usuario no existe' });
+
+			user = await knex('Users').update({password: hash}).where({ username });
+
+			return user;
+		} catch (err) {
+			console.log(err);
+		}
+	}
+
 	public static loginRequired(req, res, next) {
 		if (!req.user) return res.status(401).json({ status: 'Por favor inicie sesion' });
 		return next();

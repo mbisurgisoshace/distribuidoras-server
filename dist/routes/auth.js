@@ -49,26 +49,19 @@ router.post('/signup', (req, res, next) => __awaiter(this, void 0, void 0, funct
     catch (err) {
         handleResponse(res, err.status || 500, { error: err.message || err });
     }
-    // return authHelpers
-    // 	.createUser(req)
-    // 	.then((user) => {
-    // 		return authHelpers.encodeToken(user[0]);
-    // 	})
-    // 	.then((token) => {
-    // 		passport.authenticate('local', (err, user, info) => {
-    // 			if (user) {
-    // 				const userObj = R.omit([ 'password', 'token' ], user);
-    // 				res.status(200).json({
-    // 					status: 'success',
-    // 					user: userObj,
-    // 					token: token
-    // 				});
-    // 			}
-    // 		})(req, res, next);
-    // 	})
-    // 	.catch((err) => {
-    // 		handleResponse(res, err.status || 500, { error: err.message || err });
-    // 	});
+}));
+router.put('/change-password', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const user = yield helpers_1.default.changePassword(req);
+        const userObj = R.omit(['password', 'token'], user);
+        res.status(200).json({
+            status: 'success',
+            user: userObj,
+        });
+    }
+    catch (err) {
+        handleResponse(res, err.status || 500, { error: err.message || err });
+    }
 }));
 function handleResponse(res, code, statusMsg) {
     res.status(code).json(statusMsg);
