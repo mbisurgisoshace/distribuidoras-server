@@ -29,13 +29,25 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
-router.get('/:comodato_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:comodato_enc_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     const comodato_enc_id = req.params.comodato_enc_id;
     try {
         const comodato = yield connection_1.default('ComodatosEnc').where({ ComodatoEncID: comodato_enc_id }).first();
         const detalle = yield connection_1.default('ComodatosDet').where({ ComodatoEncID: comodato.ComodatoEncID });
         comodato.items = utils_1.camelizeKeys(detalle);
         res.status(200).json(utils_1.camelizeKeys(comodato));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get('/vigentes', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (Req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const comodatos = yield connection_1.default('ComodatosEnc')
+            .select('ComodatosEnc.*', 'Clientes.RazonSocial')
+            .innerJoin('Clientes', 'Clientes.ClienteID', 'ComodatosEnc.ClienteID')
+            .where({ Vigente: true });
+        res.status(200).json(utils_1.camelizeKeys(comodatos));
     }
     catch (err) {
         next(err);
@@ -69,7 +81,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
-router.post('/:comodato_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/:comodato_enc_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     const comodato_enc_id = req.params.comodato_enc_id;
     try {
@@ -98,6 +110,16 @@ router.post('/:comodato_enc_id/renovar', helpers_1.default.ensureAuthenticated, 
     }
     catch (err) {
         console.log('err', err);
+        next(err);
+    }
+}));
+router.post('/gestion', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        const values = req.body;
+        const gestion = (yield connection_1.default('ComodatosGestion').insert(values, '*'))[0];
+        res.status(200).json(utils_1.camelizeKeys(gestion));
+    }
+    catch (err) {
         next(err);
     }
 }));

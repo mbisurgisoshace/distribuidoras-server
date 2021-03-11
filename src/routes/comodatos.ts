@@ -22,7 +22,7 @@ router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async
   }
 });
 
-router.get('/:comodato_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.get('/:comodato_enc_id(\\d+)', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
   const comodato_enc_id = req.params.comodato_enc_id;
 
   try {
@@ -32,6 +32,19 @@ router.get('/:comodato_enc_id', authHelpers.ensureAuthenticated, authHelpers.ens
 
     res.status(200).json(camelizeKeys(comodato));
   } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/vigentes', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (Req, res, next) => {
+  try {
+    const comodatos = await knex('ComodatosEnc')
+      .select('ComodatosEnc.*', 'Clientes.RazonSocial')
+      .innerJoin('Clientes', 'Clientes.ClienteID', 'ComodatosEnc.ClienteID')
+      .where({Vigente: true});
+
+    res.status(200).json(camelizeKeys(comodatos));
+  } catch (err){
     next(err);
   }
 });
@@ -66,7 +79,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
   }
 });
 
-router.post('/:comodato_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.post('/:comodato_enc_id(\\d+)', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
   const values: any = formatKeys(req.body);
   const comodato_enc_id = req.params.comodato_enc_id;
 
@@ -98,6 +111,17 @@ router.post('/:comodato_enc_id/renovar', authHelpers.ensureAuthenticated, authHe
     res.status(200).json(camelizeKeys(newComodato));
   } catch (err) {
     console.log('err', err);
+    next(err);
+  }
+});
+
+router.post('/gestion', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  try {
+    const values: any = req.body;
+
+    const gestion = (await knex('ComodatosGestion').insert(values, '*'))[0];
+    res.status(200).json(camelizeKeys(gestion));
+  } catch (err) {
     next(err);
   }
 });
