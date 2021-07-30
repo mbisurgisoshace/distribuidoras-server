@@ -6,6 +6,7 @@ import * as bodyParser from 'body-parser';
 import knex from './db/connection';
 import auth from './routes/auth';
 import stock from './routes/stock';
+import tango from './routes/tango';
 import hojas from './routes/hojas';
 import zonas from './routes/zonas';
 import cargas from './routes/cargas';
@@ -61,6 +62,7 @@ class App {
 		this.express.use('/stock', stock);
 		this.express.use('/hojas', hojas);
 		this.express.use('/zonas', zonas);
+		this.express.use('/tango', tango);
 		this.express.use('/cargas', cargas);
 		this.express.use('/precios', precios);
 		this.express.use('/envases', envases);

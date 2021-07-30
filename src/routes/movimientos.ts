@@ -1,3 +1,4 @@
+import * as moment from 'moment';
 import * as express from 'express';
 
 import knex from '../db/connection';
@@ -20,6 +21,72 @@ router.get('/:hoja_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUse
     } catch (err) {
         next(err);
     }
+});
+
+router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+    const filters = req.body;
+
+    try {
+       let query = knex('MovimientosEnc')
+         .leftOuterJoin('HojasRuta', 'HojasRuta.HojaRutaID', 'MovimientosEnc.HojaRutaID')
+         //.leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
+         .leftOuterJoin('Clientes', 'Clientes.ClienteID', 'MovimientosEnc.ClienteID')
+         .distinct('MovimientosEnc.MovimientoEncID')
+
+       if (filters.desde && filters.hasta) {
+           const desde = moment(filters.desde, 'DD-MM-YYYY').format('YYYY-MM-DD');
+           const hasta = moment(filters.hasta, 'DD-MM-YYYY').format('YYYY-MM-DD');
+           query = query.andWhere(function() {
+               this
+                 .andWhere('MovimientosEnc.Fecha', '>=', desde)
+                 .andWhere('MovimientosEnc.Fecha', '<=', hasta);
+           })
+       }
+
+       if (filters.chofer) {
+           query = query.andWhere(function(){
+               for (let value of Object.values(filters.chofer)) {
+                   this.orWhere('HojasRuta.ChoferID', `${value}`)
+               }
+           })
+       }
+
+        if (filters.estado) {
+            query = query.andWhere(function(){
+                for (let value of Object.values(filters.estado)) {
+                    this.orWhere('MovimientosEnc.EstadoMovimientoID', `${value}`)
+                }
+            })
+        }
+
+        if (filters.condicion) {
+            query = query.andWhere(function(){
+                for (let value of Object.values(filters.condicion)) {
+                    this.orWhere('MovimientosEnc.CondicionVentaID', `${value}`)
+                }
+            })
+        }
+
+       if (filters.canal) {
+           query = query.andWhere(function(){
+               for (let value of Object.values(filters.canal)) {
+                   this.orWhere('Clientes.CanalID', `${value}`)
+               }
+           })
+       }
+
+       console.log('knex query string: ', query.toString());
+
+        let innerResult = ((await query) || [])
+          .map((res: any) => res.MovimientoEncID)
+          .filter(val => val);
+
+        const result = await knex('viewMonitor').whereIn('MovimientoEncID', innerResult);
+
+        res.send(result);
+   } catch (err) {
+       next(err);
+   }
 });
 
 router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {

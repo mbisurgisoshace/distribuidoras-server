@@ -4,6 +4,7 @@ import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
 import {camelizeKeys, formatKeys} from "../utils/utils";
 import AuditoriaService from "../services/AuditoriaService";
+import * as moment from 'moment';
 
 const router = express.Router();
 
@@ -14,6 +15,167 @@ router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async
     } catch (err) {
         next(err);
     }
+});
+
+router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const filters = req.body;
+
+  try {
+    // let query = knex('Clientes')
+    //   .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+    //   .leftOuterJoin('MovimientosEnc', 'MovimientosEnc.ClienteID', 'Clientes.ClienteID')
+    //   //.leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
+    //   .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
+    //   .leftOuterJoin('Zonas', 'Zonas.ZonaID', 'ZonasSub.ZonaID')
+    //   .distinct('Clientes.ClienteID')
+    let query = knex('Clientes')
+      .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+      .leftOuterJoin('MovimientosEnc', 'MovimientosEnc.ClienteID', 'Clientes.ClienteID')
+      //.leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
+      .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
+      .leftOuterJoin('Zonas', 'Zonas.ZonaID', 'ZonasSub.ZonaID')
+      .distinct('MovimientosEnc.MovimientoEncID')
+
+
+    if (filters.canales) {
+      query = query.andWhere(function(){
+        for (let value of Object.values(filters.canales)) {
+          this.orWhere('Clientes.CanalID', `${value}`)
+        }
+      })
+    }
+
+    if (filters.zonas) {
+      query = query.andWhere(function(){
+        for (let value of Object.values(filters.zonas)) {
+          this.orWhere('Zonas.ZonaID', `${value}`)
+        }
+      })
+    }
+
+    if (filters.rango_fechas) {
+      query = query.andWhere(function(){
+        this.andWhere('MovimientosEnc.EstadoMovimientoID', 3);
+
+        if (filters.rango_fechas.start && filters.rango_fechas.end) {
+          const desde = moment(filters.rango_fechas.start, 'DD-MM-YYYY').format('YYYY-MM-DD');
+          const hasta = moment(filters.rango_fechas.end, 'DD-MM-YYYY').format('YYYY-MM-DD');
+
+          this
+            .andWhere('MovimientosEnc.Fecha', '>=', desde)
+            .andWhere('MovimientosEnc.Fecha', '<=', hasta);
+        } else {
+          if (filters.rango_fechas.start) {
+            const desde = moment(filters.rango_fechas.start, 'DD-MM-YYYY').format('YYYY-MM-DD');
+            this.orWhere('MovimientosEnc.Fecha','>=', desde)
+          }
+
+          if (filters.rango_fechas.end) {
+            const hasta = moment(filters.rango_fechas.end, 'DD-MM-YYYY').format('YYYY-MM-DD');
+            this.orWhere('MovimientosEnc.Fecha','<=', hasta)
+          }
+        }
+      })
+    }
+
+    query = query.andWhere('Clientes.Latitud', '!=', 0);
+    query = query.andWhere('Clientes.Longitud', '!=', 0);
+
+    console.log('knex query string: ', query.toString());
+
+    // let innerResult = ((await query) || [])
+    //   .map((res: any) => res.ClienteID)
+    //   .filter(val => val);
+
+    let innerResult = ((await query) || [])
+      .map((res: any) => res.MovimientoEncID)
+      .filter(val => val);
+
+    console.log('innerResult', innerResult);
+
+    let query_comercial = knex('MovimientosEnc')
+      .leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
+      .leftOuterJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
+      .whereIn('MovimientosEnc.MovimientoEncID', innerResult)
+      .distinct('MovimientosEnc.ClienteID')
+      .groupBy('MovimientosEnc.ClienteID');
+
+    if (filters.tipo_producto) {
+      query_comercial = knex('viewTotalesPorTipoEnvase')
+        .whereIn('MovimientoEncID', innerResult)
+
+      if (filters.tipo_producto.butano && (filters.tipo_producto.butano.min || filters.tipo_producto.butano.max)) {
+        query_comercial = query_comercial.andWhere(function(){
+          this.andWhere('TipoEnvaseID', 1);
+
+          if (filters.tipo_producto.butano.min && filters.tipo_producto.butano.max) {
+            const min = filters.tipo_producto.butano.min;
+            const max = filters.tipo_producto.butano.max;
+
+            this
+              .andWhere('TotalKilos', '>=', min)
+              .andWhere('TotalKilos', '<=', max);
+          } else {
+            if (filters.tipo_producto.butano.min) {
+              const min = filters.tipo_producto.butano.min;
+              this.andWhere('TotalKilos','>=', min)
+            }
+
+            if (filters.tipo_producto.butano.max) {
+              const max = filters.tipo_producto.butano.max;
+              this.andWhere('TotalKilos','<=', max)
+            }
+          }
+        })
+      }
+
+      if (filters.tipo_producto.propano && (filters.tipo_producto.propano.min || filters.tipo_producto.propano.max)) {
+        query_comercial = query_comercial.andWhere(function(){
+          this.andWhere('TipoEnvaseID', 2);
+
+          if (filters.tipo_producto.propano.min && filters.tipo_producto.propano.max) {
+            const min = filters.tipo_producto.propano.min;
+            const max = filters.tipo_producto.propano.max;
+
+            this
+              .andWhere('TotalKilos', '>=', min)
+              .andWhere('TotalKilos', '<=', max);
+          } else {
+            if (filters.tipo_producto.propano.min) {
+              const min = filters.tipo_producto.propano.min;
+              this.andWhere('TotalKilos','>=', min)
+            }
+
+            if (filters.tipo_producto.propano.max) {
+              const max = filters.tipo_producto.propano.max;
+              this.andWhere('TotalKilos','<=', max)
+            }
+          }
+        })
+      }
+    }
+
+    if (filters.producto) {
+
+    }
+
+    console.log('knex query_comercial string: ', query_comercial.toString());
+
+    let outerResult = ((await query_comercial) || [])
+      .map((res: any) => res.ClienteID)
+      .filter(val => val);
+
+    console.log('outerResult', outerResult);
+
+    //const result = await knex('Clientes').whereIn('ClienteID', innerResult);
+    const result = await knex('Clientes').whereIn('ClienteID', outerResult);
+
+    res.send(camelizeKeys(result));
+    //res.send(camelizeKeys([]));
+  } catch (err) {
+    console.log('err', err);
+    res.send(camelizeKeys([]));
+  }
 });
 
 router.get('/:cliente_id(\\d+)', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
@@ -142,26 +304,34 @@ router.get('/:cliente_id/comodato', authHelpers.ensureAuthenticated, authHelpers
   const cliente_id = req.params.cliente_id;
 
   try {
-    const comodato = await knex('ComodatosEnc')
-      .where({ClienteID: cliente_id, Vigente: true})
-      .first();
+    // const comodato = await knex('ComodatosEnc')
+    //   .where({ClienteID: cliente_id, Vigente: true})
+    //   .first();
+    //
+    // if (comodato) {
+    //   let items = await knex('ComodatosDet')
+    //     .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
+    //     .where({ComodatoEncID: comodato.ComodatoEncID})
+    //     .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto');
+    //
+    //   let lastComodato = {
+    //     fecha: comodato.Fecha,
+    //     comprobante: comodato.NroComprobante,
+    //     items: camelizeKeys(items)
+    //   }
+    //
+    //   res.status(200).json(lastComodato);
+    // } else {
+    //   res.status(404).json({error: 'El cliente no tiene comodatos.'});
+    // }
+    const items = await knex('ComodatosMovimientos')
+      .select('Envases.EnvaseCodigo', 'Envases.EnvaseNombre')
+      .sum('Cantidad as Cantidad')
+      .innerJoin('Envases', 'ComodatosMovimientos.envase_id', 'Envases.EnvaseID')
+      .where({cliente_id})
+      .groupBy('Envases.EnvaseCodigo', 'Envases.EnvaseNombre' );
 
-    if (comodato) {
-      let items = await knex('ComodatosDet')
-        .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
-        .where({ComodatoEncID: comodato.ComodatoEncID})
-        .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto');
-
-      let lastComodato = {
-        fecha: comodato.Fecha,
-        comprobante: comodato.NroComprobante,
-        items: camelizeKeys(items)
-      }
-
-      res.status(200).json(lastComodato);
-    } else {
-      res.status(404).json({error: 'El cliente no tiene comodatos.'});
-    }
+    res.status(200).json(camelizeKeys(items));
   } catch (err) {
     next(err);
   }

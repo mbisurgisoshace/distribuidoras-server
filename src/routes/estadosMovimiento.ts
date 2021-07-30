@@ -2,13 +2,14 @@ import * as express from 'express';
 
 import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
+import {camelizeKeys, formatKeys} from "../utils/utils";
 
 const router = express.Router();
 
 router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
 	try {
 		const estadosMovimiento = await knex('MovimientosEstado').select('*');
-		res.status(200).json(estadosMovimiento);
+		res.status(200).json(camelizeKeys(estadosMovimiento));
 	} catch (err) {
 		next(err);
 	}

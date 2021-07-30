@@ -5,6 +5,7 @@ import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
 import {camelizeKeys, formatKeys} from "../utils/utils";
 import ComodatoService from '../services/ComodatoService';
+import AuditoriaService from '../services/AuditoriaService';
 
 const router = express.Router();
 
@@ -53,15 +54,24 @@ router.get('/cliente/:cliente_id', authHelpers.ensureAuthenticated, authHelpers.
   const cliente_id = req.params.cliente_id;
 
   try {
-    const comodato = await knex('ComodatosEnc').where({ClienteID: cliente_id, vigente: true}).first();
+    const comodatos = await knex('ComodatosEnc')
+      .where({ClienteID: cliente_id, vigente: true})
 
-    if (comodato) {
+    for (let i = 0; i < comodatos.length; i++) {
+      let comodato = comodatos[i];
       const detalle = await knex('ComodatosDet').where({ComodatoEncID: comodato.ComodatoEncID});
       comodato.items = camelizeKeys(detalle);
-      res.status(200).json(camelizeKeys(comodato));
-    } else {
-      res.status(200).json(null);
     }
+
+    // if (comodato) {
+    //   const detalle = await knex('ComodatosDet').where({ComodatoEncID: comodato.ComodatoEncID});
+    //   comodato.items = camelizeKeys(detalle);
+    //   res.status(200).json(camelizeKeys(comodato));
+    // } else {
+    //   res.status(200).json(null);
+    // }
+
+    res.status(200).json(camelizeKeys(comodatos));
   } catch (err) {
     next(err);
   }
@@ -72,6 +82,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 
   try {
     const comodato = (await knex('ComodatosEnc').insert(values, '*'))[0];
+    AuditoriaService.log('comodatos', comodato.ComodatoEncID, JSON.stringify(comodato), 'insert', req.user.username);
     res.status(200).json(camelizeKeys(comodato));
   } catch (err) {
     console.log('err', err);
@@ -86,7 +97,11 @@ router.post('/:comodato_enc_id(\\d+)', authHelpers.ensureAuthenticated, authHelp
   try {
     const comodato = await knex('ComodatosEnc').where({ComodatoEncID: comodato_enc_id}).first()
     const items = await knex('ComodatosDet').insert(values, '*');
-    await ComodatoService.insertarMovimientos(camelizeKeys(comodato), camelizeKeys(items), []);
+
+    if (comodato.Tipo !== 'renovacion') {
+      await ComodatoService.insertarMovimientos(camelizeKeys(comodato), camelizeKeys(items));
+    }
+
     res.status(200).json(camelizeKeys(items));
   } catch (err) {
     console.log('err', err);
@@ -105,12 +120,41 @@ router.post('/:comodato_enc_id/renovar', authHelpers.ensureAuthenticated, authHe
     comodato.items = camelizeKeys(detalle);
 
     const newComodato = await ComodatoService.insertarComodato(comodatoEnc, formatKeys(comodatoDet.items));
-    await ComodatoService.insertarMovimientos(camelizeKeys(newComodato), camelizeKeys(newComodato.items), camelizeKeys(comodato.items));
+    //await ComodatoService.insertarMovimientos(camelizeKeys(newComodato), camelizeKeys(newComodato.items), camelizeKeys(comodato.items));
     await knex('ComodatosEnc').update({Vigente: false, Renovado: true, NroRenovacion: newComodato.NroComprobante}).where({ComodatoEncID: comodato_enc_id});
 
     res.status(200).json(camelizeKeys(newComodato));
   } catch (err) {
     console.log('err', err);
+    next(err);
+  }
+});
+
+router.put('/renovar', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  try {
+    const values: any = req.body;
+    for (let i = 0; i < values.length; i++) {
+      let comodato = values[i];
+      let comodatoId = comodato.comodato_enc_id;
+      comodato = R.omit(['comodato_enc_id', 'items'], comodato);
+      await knex('ComodatosEnc').update({
+        ClienteID: comodato.cliente_id,
+        Fecha: comodato.fecha,
+        NroComprobante: comodato.nro_comprobante,
+        Monto: comodato.monto,
+        FechaVencimiento: comodato.fecha_vencimiento,
+        FechaRenovacion: comodato.fecha_renovacion,
+        Vigente: comodato.vigente,
+        Renovado: comodato.renovado,
+        NroRenovacion: comodato.nro_renovacion,
+        Observaciones: comodato.observaciones,
+        ChoferID: comodato.chofer_id,
+        Tipo: comodato.tipo
+      }).where({ComodatoEncID: comodatoId});
+    }
+
+    res.status(200).json('Ok');
+  } catch (err) {
     next(err);
   }
 });

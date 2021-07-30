@@ -11,11 +11,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const connection_1 = require("../db/connection");
 const helpers_1 = require("../auth/helpers");
+const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     try {
         const estadosMovimiento = yield connection_1.default('MovimientosEstado').select('*');
-        res.status(200).json(estadosMovimiento);
+        res.status(200).json(utils_1.camelizeKeys(estadosMovimiento));
     }
     catch (err) {
         next(err);
