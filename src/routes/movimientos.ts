@@ -23,6 +23,22 @@ router.get('/:hoja_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUse
     }
 });
 
+router.get('/movimiento/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const movimiento_enc_id = req.params.movimiento_enc_id;
+
+  try {
+    const movimiento = await knex('MovimientosEnc').where({MovimientoEncID: movimiento_enc_id}).first();
+    console.log('movimiento_enc_id', movimiento_enc_id);
+    console.log('movimiento', movimiento);
+    const items = await knex('MovimientosDet').where({MovimientoEncID: movimiento.MovimientoEncID});
+    movimiento.items = camelizeKeys(items);
+    res.status(200).json(camelizeKeys(movimiento));
+  } catch (err) {
+    console.log('err', err);
+    next(err);
+  }
+});
+
 router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
     const filters = req.body;
 
@@ -32,6 +48,7 @@ router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser
          //.leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
          .leftOuterJoin('Clientes', 'Clientes.ClienteID', 'MovimientosEnc.ClienteID')
          .distinct('MovimientosEnc.MovimientoEncID')
+         .orderBy('MovimientosEnc.MovimientoEncID')
 
        if (filters.desde && filters.hasta) {
            const desde = moment(filters.desde, 'DD-MM-YYYY').format('YYYY-MM-DD');
@@ -83,7 +100,7 @@ router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser
 
         const result = await knex('viewMonitor').whereIn('MovimientoEncID', innerResult);
 
-        res.send(result);
+      res.send(result);
    } catch (err) {
        next(err);
    }
@@ -111,6 +128,62 @@ router.post('/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.
         console.log('err', err);
         next(err);
     }
+});
+
+router.put('/actualizacion_masiva', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const values = req.body;
+  const ids = values.ids;
+  const actualizaciones = formatKeys(values.actualizaciones);
+  console.log('ids', ids);
+  console.log('actualizaciones', actualizaciones);
+
+  try {
+    await knex('MovimientosEnc')
+      .update(actualizaciones, '*')
+      .whereIn('MovimientoEncID', ids);
+
+    res.status(200).json('ok');
+  } catch (err) {
+    console.log('err', err);
+    next(err);
+  }
+});
+
+router.put('/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const values: any = formatKeys(req.body);
+
+  try {
+    for (let i = 0; i < values.length; i++) {
+      const v = values[i];
+
+      if (v.movimientodetid) {
+        const id = v.movimientodetid;
+        const updateRow = formatKeys(v, 'movimientodetid');
+        await knex('MovimientosDet').where({MovimientoDetID: id}).update(updateRow, '*');
+      } else {
+        await knex('MovimientosDet').insert(v, '*');
+      }
+    }
+
+    const items = [];
+    res.status(200).json(camelizeKeys(items));
+  } catch (err) {
+    console.log('err', err);
+    next(err);
+  }
+});
+
+router.put('/movimiento/:movimiento_enc_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const movimiento_enc_id = req.params.movimiento_enc_id;
+  const values: any = formatKeys(req.body);
+
+  try {
+    const movimiento = (await knex('MovimientosEnc').where({MovimientoEncID: movimiento_enc_id}).update(values, '*'))[0];
+    res.status(200).json(camelizeKeys(movimiento));
+  } catch (err) {
+    console.log('err', err);
+    next(err);
+  }
 });
 
 export default router;

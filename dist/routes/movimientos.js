@@ -29,6 +29,21 @@ router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default
         next(err);
     }
 }));
+router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const movimiento_enc_id = req.params.movimiento_enc_id;
+    try {
+        const movimiento = yield connection_1.default('MovimientosEnc').where({ MovimientoEncID: movimiento_enc_id }).first();
+        console.log('movimiento_enc_id', movimiento_enc_id);
+        console.log('movimiento', movimiento);
+        const items = yield connection_1.default('MovimientosDet').where({ MovimientoEncID: movimiento.MovimientoEncID });
+        movimiento.items = utils_1.camelizeKeys(items);
+        res.status(200).json(utils_1.camelizeKeys(movimiento));
+    }
+    catch (err) {
+        console.log('err', err);
+        next(err);
+    }
+}));
 router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     const filters = req.body;
     try {
@@ -36,7 +51,8 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
             .leftOuterJoin('HojasRuta', 'HojasRuta.HojaRutaID', 'MovimientosEnc.HojaRutaID')
             //.leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
             .leftOuterJoin('Clientes', 'Clientes.ClienteID', 'MovimientosEnc.ClienteID')
-            .distinct('MovimientosEnc.MovimientoEncID');
+            .distinct('MovimientosEnc.MovimientoEncID')
+            .orderBy('MovimientosEnc.MovimientoEncID');
         if (filters.desde && filters.hasta) {
             const desde = moment(filters.desde, 'DD-MM-YYYY').format('YYYY-MM-DD');
             const hasta = moment(filters.hasta, 'DD-MM-YYYY').format('YYYY-MM-DD');
@@ -101,6 +117,57 @@ router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helper
     try {
         const items = yield connection_1.default('MovimientosDet').insert(values, '*');
         res.status(200).json(utils_1.camelizeKeys(items));
+    }
+    catch (err) {
+        console.log('err', err);
+        next(err);
+    }
+}));
+router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const values = req.body;
+    const ids = values.ids;
+    const actualizaciones = utils_1.formatKeys(values.actualizaciones);
+    console.log('ids', ids);
+    console.log('actualizaciones', actualizaciones);
+    try {
+        yield connection_1.default('MovimientosEnc')
+            .update(actualizaciones, '*')
+            .whereIn('MovimientoEncID', ids);
+        res.status(200).json('ok');
+    }
+    catch (err) {
+        console.log('err', err);
+        next(err);
+    }
+}));
+router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const values = utils_1.formatKeys(req.body);
+    try {
+        for (let i = 0; i < values.length; i++) {
+            const v = values[i];
+            if (v.movimientodetid) {
+                const id = v.movimientodetid;
+                const updateRow = utils_1.formatKeys(v, 'movimientodetid');
+                yield connection_1.default('MovimientosDet').where({ MovimientoDetID: id }).update(updateRow, '*');
+            }
+            else {
+                yield connection_1.default('MovimientosDet').insert(v, '*');
+            }
+        }
+        const items = [];
+        res.status(200).json(utils_1.camelizeKeys(items));
+    }
+    catch (err) {
+        console.log('err', err);
+        next(err);
+    }
+}));
+router.put('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const movimiento_enc_id = req.params.movimiento_enc_id;
+    const values = utils_1.formatKeys(req.body);
+    try {
+        const movimiento = (yield connection_1.default('MovimientosEnc').where({ MovimientoEncID: movimiento_enc_id }).update(values, '*'))[0];
+        res.status(200).json(utils_1.camelizeKeys(movimiento));
     }
     catch (err) {
         console.log('err', err);

@@ -2,20 +2,21 @@ import * as express from 'express';
 
 import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
+import { camelizeKeys, formatKeys } from '../utils/utils';
 
 const router = express.Router();
 
 router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
 	try {
 		const feriados = await knex('Feriados').select('*');
-		res.status(200).json(feriados);
+		res.status(200).json(camelizeKeys(feriados));
 	} catch (err) {
 		next(err);
 	}
 });
 
 router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
-	const values = req.body;
+	const values = formatKeys(req.body);
 
 	try {
 		const feriado = (await knex('Feriados').insert(values, '*'))[0];
@@ -27,7 +28,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 
 router.put('/:feriado_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
 	const feriado_id = req.params.feriado_id;
-	const values = req.body;
+	const values = formatKeys(req.body, 'feriado_id');
 
 	try {
 		const feriado = await knex('Feriados').where({ FeriadoID: feriado_id }).first();

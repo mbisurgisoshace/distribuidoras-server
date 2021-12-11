@@ -19,7 +19,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
     try {
         const today = moment().format('YYYY-MM-DD');
         const hojas = yield connection_1.default('HojasRuta')
-            .select('HojasRuta.*', 'Choferes.Apellido')
+            .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
             .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
             .where({ Fecha: today });
         res.status(200).json(utils_1.camelizeKeys(hojas));
@@ -49,10 +49,11 @@ router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.def
     }
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-    const values = req.body;
+    const values = utils_1.formatKeys(req.body);
     try {
         const hoja = (yield connection_1.default('HojasRuta').insert(values, '*'))[0];
-        res.status(200).json(hoja);
+        AuditoriaService_1.default.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
+        res.status(200).json(utils_1.camelizeKeys(hoja));
     }
     catch (err) {
         next(err);
@@ -86,6 +87,18 @@ router.delete('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.defa
         else {
             res.status(400).json({ error: `Hoja Ruta ID: ${hoja_id} no existe.` });
         }
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.post('/:hoja_id/movimientos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const hoja_id = req.params.hoja_id;
+    const values = utils_1.formatKeys(req.body);
+    try {
+        const movimientos = yield connection_1.default('MovimientosEnc').insert(values, '*');
+        //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
+        res.status(200).json(movimientos);
     }
     catch (err) {
         next(err);

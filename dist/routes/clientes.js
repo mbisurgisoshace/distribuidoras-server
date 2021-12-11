@@ -178,6 +178,21 @@ router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, help
         next(err);
     }
 }));
+router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+    const { zonaId, diaSemana } = req.query;
+    try {
+        const zonasSub = yield connection_1.default('ZonasSub').where({ ZonaID: zonaId }).select('*');
+        const clientes = yield connection_1.default('Plantillas')
+            .innerJoin('Clientes', 'Clientes.ClienteID', 'Plantillas.ClienteID')
+            .whereIn('Clientes.ZonaSubID', zonasSub.map(zs => zs.SubZonaID))
+            .andWhere('DiaSemana', diaSemana)
+            .select('Clientes.*');
+        res.status(200).json(utils_1.camelizeKeys(clientes));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     try {
         const lastCodigo = (yield connection_1.default('Clientes').first().orderBy('ClienteID', 'desc').pluck('ClienteID'))[0] + 1;

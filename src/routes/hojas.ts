@@ -13,7 +13,7 @@ router.get('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async
         const today = moment().format('YYYY-MM-DD');
 
         const hojas = await knex('HojasRuta')
-          .select('HojasRuta.*', 'Choferes.Apellido')
+          .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
           .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
           .where({Fecha: today});
         res.status(200).json(camelizeKeys(hojas));
@@ -45,11 +45,12 @@ router.get('/fecha/:fecha', authHelpers.ensureAuthenticated, authHelpers.ensureI
 });
 
 router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
-    const values = req.body;
+    const values = formatKeys(req.body);
 
     try {
         const hoja = (await knex('HojasRuta').insert(values, '*'))[0];
-        res.status(200).json(hoja);
+        AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
+        res.status(200).json(camelizeKeys(hoja));
     } catch (err) {
         next(err);
     }
@@ -85,6 +86,19 @@ router.delete('/:hoja_id', authHelpers.ensureAuthenticated, authHelpers.ensureIs
         } else {
             res.status(400).json({error: `Hoja Ruta ID: ${hoja_id} no existe.`});
         }
+    } catch (err) {
+        next(err);
+    }
+});
+
+router.post('/:hoja_id/movimientos', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+    const hoja_id = req.params.hoja_id;
+    const values: any = formatKeys(req.body);
+
+    try {
+        const movimientos = await knex('MovimientosEnc').insert(values, '*');
+        //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
+        res.status(200).json(movimientos);
     } catch (err) {
         next(err);
     }

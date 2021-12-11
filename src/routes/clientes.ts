@@ -200,6 +200,23 @@ router.get('/canal/:canal_id(\\d+)', authHelpers.ensureAuthenticated, authHelper
   }
 });
 
+router.get('/plantilla', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+  const {zonaId, diaSemana} = req.query;
+
+  try {
+    const zonasSub = await knex('ZonasSub').where({ZonaID: zonaId}).select('*');
+
+    const clientes = await knex('Plantillas')
+      .innerJoin('Clientes', 'Clientes.ClienteID', 'Plantillas.ClienteID')
+      .whereIn('Clientes.ZonaSubID', zonasSub.map(zs => zs.SubZonaID))
+      .andWhere('DiaSemana', diaSemana)
+      .select('Clientes.*');
+    res.status(200).json(camelizeKeys(clientes));
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/last', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
     try {
         const lastCodigo = (await knex('Clientes').first().orderBy('ClienteID', 'desc').pluck('ClienteID'))[0] + 1;
