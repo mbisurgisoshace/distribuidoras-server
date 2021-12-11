@@ -76,6 +76,13 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
                 }
             });
         }
+        if (filters.tipos) {
+            query = query.andWhere(function () {
+                for (let value of Object.values(filters.tipos)) {
+                    this.orWhere('MovimientosEnc.TipoMovimientoID', `${value}`);
+                }
+            });
+        }
         if (filters.condicion) {
             query = query.andWhere(function () {
                 for (let value of Object.values(filters.condicion)) {
