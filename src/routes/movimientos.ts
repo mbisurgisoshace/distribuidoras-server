@@ -106,7 +106,7 @@ router.post('/search', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser
       .map((res: any) => res.MovimientoEncID)
       .filter(val => val);
 
-    const result = await knex('viewMonitor').whereIn('MovimientoEncID', innerResult);
+    const result = await knex('viewMonitor').whereIn('MovimientoEncID', innerResult).timeout(30000);
 
     res.send(result);
   } catch (err) {

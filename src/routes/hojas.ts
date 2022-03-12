@@ -98,7 +98,7 @@ router.post('/:hoja_id/movimientos', authHelpers.ensureAuthenticated, authHelper
     try {
         const movimientos = await knex('MovimientosEnc').insert(values, '*');
         //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
-        res.status(200).json(movimientos);
+        res.status(200).json(movimientos || {});
     } catch (err) {
         next(err);
     }
