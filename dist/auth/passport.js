@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -17,7 +18,7 @@ let opts = {
     jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderWithScheme('JWT'),
     secretOrKey: process.env.TOKEN_SECRET
 };
-passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(this, void 0, void 0, function* () {
+passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield connection_1.default('Users').where({ username: jwt_payload.username }).first();
         if (!user)
@@ -33,7 +34,7 @@ passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(
         return done(err);
     }
 })));
-passport.use(new passport_local_1.Strategy(opts, (username, password, done) => __awaiter(this, void 0, void 0, function* () {
+passport.use(new passport_local_1.Strategy(opts, (username, password, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield connection_1.default('Users').where({ username }).first();
         if (!user)
@@ -53,7 +54,7 @@ passport.use(new passport_local_1.Strategy(opts, (username, password, done) => _
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
-passport.deserializeUser((id, done) => __awaiter(this, void 0, void 0, function* () {
+passport.deserializeUser((id, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield connection_1.default('Users').where({ id }).first();
         done(null, user);

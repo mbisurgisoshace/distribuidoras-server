@@ -1,3 +1,4 @@
+//@ts-ignore
 import { Knex } from 'knex';
 
 import knex from '../../db/connection';

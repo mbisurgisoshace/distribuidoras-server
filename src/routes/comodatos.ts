@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import * as R from 'ramda';
 import * as express from 'express';
 

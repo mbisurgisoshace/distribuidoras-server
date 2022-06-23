@@ -106,6 +106,31 @@ export default class TangoService {
     }
   }
 
+  public static async getVentaFacturada(desde, hasta) {
+    try {
+      const facturacion = await tangoKnex('GVA53')
+        .select('*')
+        .whereBetween('FECHA_MOV', [desde, hasta])
+        .andWhere({TCOMP_IN_V: 'FC'});
+      
+      return facturacion;
+    } catch (err) {
+      console.log('err', err)
+    }
+  }
+
+  public static async getRemitosPendientes(desde, hasta) {
+    try {
+      const remitosPendientes = await tangoKnex('STA20')
+      .whereBetween('FECHA_MOV', [desde, hasta])
+      .andWhere({TCOMP_IN_S: 'RE'});
+
+      return remitosPendientes;
+    } catch (err) {
+      console.log('err', err)
+    }
+  }
+
   private static crearClienteTango(clienteCrm, clienteTangoId) {
 
     return {
@@ -114,13 +139,16 @@ export default class TangoService {
       COD_ZONA: '1',
       COND_VTA: this.crearCondicionVenta(clienteCrm.CondicionVentaID),
       CUIT: clienteCrm.Cuit,
-      DIR_COM: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
-      DOMICILIO: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
+      //DIR_COM: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
+      //DOMICILIO: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
+      DIR_COM: 'Direccion',
+      DOMICILIO: 'Direccion',
       II_D: 'N',
       II_L: 'N',
       IVA_D: this.crearIvaD(clienteCrm.CondicionIvaID),
       IVA_L: 'S',
-      LOCALIDAD: clienteCrm.Localidad,
+      //LOCALIDAD: clienteCrm.Localidad,
+      LOCALIDAD: 'Localidad',
       NOM_COM: clienteCrm.RazonSocial,
       RAZON_SOCI: clienteCrm.RazonSocial,
       SOBRE_II: 'N',
@@ -139,8 +167,10 @@ export default class TangoService {
       ID_DIRECCION_ENTREGA: idDomicilioEntrega,
       COD_DIRECCION_ENTREGA: 'PRINCIPAL',
       COD_CLIENTE: clienteCrm.ClienteID,
-      DIRECCION: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
-      LOCALIDAD: clienteCrm.Localidad,
+      //DIRECCION: this.crearDireccion(clienteCrm.Altura, clienteCrm.Calle),
+      //LOCALIDAD: clienteCrm.Localidad,
+      DIRECCION: 'Direccion',
+      LOCALIDAD: 'Localidad',
       HABITUAL: 'S',
       HABILITADO: 'S',
       TELEFONO1: clienteCrm.Telefono,

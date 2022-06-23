@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -13,7 +14,7 @@ const R = require("ramda");
 const helpers_1 = require("../auth/helpers");
 const router = express.Router();
 const passport = require('../auth/passport');
-router.post('/login', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
             handleResponse(res, 500, { error: err });
@@ -31,7 +32,7 @@ router.post('/login', (req, res, next) => __awaiter(this, void 0, void 0, functi
         }
     })(req, res, next);
 }));
-router.post('/signup', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/signup', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield helpers_1.default.createUser(req);
         const token = helpers_1.default.encodeToken(user[0]);
@@ -50,7 +51,7 @@ router.post('/signup', (req, res, next) => __awaiter(this, void 0, void 0, funct
         handleResponse(res, err.status || 500, { error: err.message || err });
     }
 }));
-router.put('/change-password', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/change-password', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield helpers_1.default.changePassword(req);
         const userObj = R.omit(['password', 'token'], user);

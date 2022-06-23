@@ -51,14 +51,14 @@ if [ -z $OPTION ] || [ "$OPTION" == "client" ]; then
   docker-compose run client /bin/bash -c "BASE_SERVICE_URL=$BASE_SERVICE_URL && LATITUDE=$LATITUDE && LONGITUDE=$LONGITUDE && yarn build"
 
   # Client docker container
-  docker build -t distribuidoras-client:$ENVIRONMENT -f ../client/deploy.Dockerfile ../client
-  docker tag distribuidoras-client:$ENVIRONMENT repo.treescale.com/mbisurgi/distribuidoras-client:$ENVIRONMENT
-  docker push repo.treescale.com/mbisurgi/distribuidoras-client:$ENVIRONMENT
+  docker build --platform=linux/amd64 -t distribuidoras-client:$ENVIRONMENT -f ../client/deploy.Dockerfile ../client
+  docker tag distribuidoras-client:$ENVIRONMENT mbisurgi/distribuidoras-client:$ENVIRONMENT
+  docker push mbisurgi/distribuidoras-client:$ENVIRONMENT
 fi
 
 if [ -z $OPTION ] || [ "$OPTION" == "server" ]; then
   # Server docker container
-  docker build -t distribuidoras-server:$ENVIRONMENT -f ./deploy.Dockerfile .
-  docker tag distribuidoras-server:$ENVIRONMENT repo.treescale.com/mbisurgi/distribuidoras-server:$ENVIRONMENT
-  docker push repo.treescale.com/mbisurgi/distribuidoras-server:$ENVIRONMENT
+  docker build --platform=linux/amd64 -t distribuidoras-server:$ENVIRONMENT -f ./deploy.Dockerfile .
+  docker tag distribuidoras-server:$ENVIRONMENT mbisurgi/distribuidoras-server:$ENVIRONMENT
+  docker push mbisurgi/distribuidoras-server:$ENVIRONMENT
 fi

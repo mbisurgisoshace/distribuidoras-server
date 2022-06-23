@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -14,11 +15,11 @@ const connection_1 = require("../db/connection");
 const helpers_1 = require("../auth/helpers");
 const utils_1 = require("../utils/utils");
 const router = express.Router();
-router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
         const movimientos = yield connection_1.default('MovimientosEnc').where({ HojaRutaID: hoja_id });
-        yield Promise.all(movimientos.map((m) => __awaiter(this, void 0, void 0, function* () {
+        yield Promise.all(movimientos.map((m) => __awaiter(void 0, void 0, void 0, function* () {
             const detalle = yield connection_1.default('MovimientosDet').where({ MovimientoEncID: m.MovimientoEncID });
             utils_1.camelizeKeys(detalle);
             m.items = utils_1.camelizeKeys(detalle);
@@ -29,7 +30,7 @@ router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default
         next(err);
     }
 }));
-router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const movimiento_enc_id = req.params.movimiento_enc_id;
     try {
         const movimiento = yield connection_1.default('MovimientosEnc').where({ MovimientoEncID: movimiento_enc_id }).first();
@@ -44,7 +45,7 @@ router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
         next(err);
     }
 }));
-router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = req.body;
     try {
         let query = connection_1.default('MovimientosEnc')
@@ -101,14 +102,14 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         let innerResult = ((yield query) || [])
             .map((res) => res.MovimientoEncID)
             .filter(val => val);
-        const result = yield connection_1.default('viewMonitor').whereIn('MovimientoEncID', innerResult);
+        const result = yield connection_1.default('viewMonitor').whereIn('MovimientoEncID', innerResult).timeout(30000);
         res.send(result);
     }
     catch (err) {
         next(err);
     }
 }));
-router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
         const movimiento = (yield connection_1.default('MovimientosEnc').insert(values, '*'))[0];
@@ -119,7 +120,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
-router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
         const items = yield connection_1.default('MovimientosDet').insert(values, '*');
@@ -130,7 +131,7 @@ router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helper
         next(err);
     }
 }));
-router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     const ids = values.ids;
     const actualizaciones = utils_1.formatKeys(values.actualizaciones);
@@ -147,7 +148,7 @@ router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpe
         next(err);
     }
 }));
-router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
         for (let i = 0; i < values.length; i++) {
@@ -169,7 +170,7 @@ router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers
         next(err);
     }
 }));
-router.put('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const movimiento_enc_id = req.params.movimiento_enc_id;
     const values = utils_1.formatKeys(req.body);
     try {

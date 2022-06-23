@@ -1,9 +1,11 @@
 "use strict";
+//@ts-nocheck
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -15,7 +17,7 @@ const utils_1 = require("../utils/utils");
 const AuditoriaService_1 = require("../services/AuditoriaService");
 const moment = require("moment");
 const router = express.Router();
-router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const clientes = yield connection_1.default('Clientes').select('*');
         res.status(200).json(utils_1.camelizeKeys(clientes));
@@ -24,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
-router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = req.body;
     try {
         // let query = knex('Clientes')
@@ -158,7 +160,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         res.send(utils_1.camelizeKeys([]));
     }
 }));
-router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
         const cliente = yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).first();
@@ -168,7 +170,7 @@ router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_
         next(err);
     }
 }));
-router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const canal_id = req.params.canal_id;
     try {
         const clientes = yield connection_1.default('Clientes').where({ CanalID: canal_id });
@@ -178,7 +180,7 @@ router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, help
         next(err);
     }
 }));
-router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { zonaId, diaSemana } = req.query;
     try {
         const zonasSub = yield connection_1.default('ZonasSub').where({ ZonaID: zonaId }).select('*');
@@ -193,7 +195,7 @@ router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.defaul
         next(err);
     }
 }));
-router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const lastCodigo = (yield connection_1.default('Clientes').first().orderBy('ClienteID', 'desc').pluck('ClienteID'))[0] + 1;
         res.status(200).json(lastCodigo);
@@ -202,7 +204,7 @@ router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ens
         next(err);
     }
 }));
-router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body, 'cliente_id');
     values.Estado = true;
     try {
@@ -215,7 +217,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
-router.put('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     const values = utils_1.formatKeys(req.body, 'cliente_id');
     try {
@@ -233,7 +235,7 @@ router.put('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_
         next(err);
     }
 }));
-router.delete('/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.delete('/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
         const deletedCliente = yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).delete();
@@ -249,7 +251,7 @@ router.delete('/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.d
         next(err);
     }
 }));
-router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
         const lastPedidoId = yield connection_1.default('MovimientosEnc')
@@ -262,11 +264,11 @@ router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1
                 .innerJoin('MovimientosDet', 'MovimientosEnc.MovimientoEncID', 'MovimientosDet.MovimientoEncID')
                 .innerJoin('Envases', 'MovimientosDet.EnvaseID', 'Envases.EnvaseID')
                 .where('MovimientosEnc.MovimientoEncID', lastPedidoId[0])
-                .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto');
+                .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto', 'Envases.EnvaseID');
             if (items && items.length > 0) {
                 items = items.map(i => {
                     let precio = i.Monto / i.Cantidad;
-                    return Object.assign({}, i, { precio });
+                    return Object.assign(Object.assign({}, i), { precio });
                 });
             }
             let lastPedido = {
@@ -283,7 +285,7 @@ router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1
         next(err);
     }
 }));
-router.get('/:cliente_id/comodato', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:cliente_id/comodato', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
         // const comodato = await knex('ComodatosEnc')

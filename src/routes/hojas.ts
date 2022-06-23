@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import * as moment from 'moment';
 import * as express from 'express';
 

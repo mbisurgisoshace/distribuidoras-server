@@ -1,9 +1,11 @@
 "use strict";
+//@ts-nocheck
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -15,7 +17,7 @@ const helpers_1 = require("../auth/helpers");
 const utils_1 = require("../utils/utils");
 const AuditoriaService_1 = require("../services/AuditoriaService");
 const router = express.Router();
-router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const today = moment().format('YYYY-MM-DD');
         const hojas = yield connection_1.default('HojasRuta')
@@ -28,7 +30,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
-router.get('/:hoja_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:hoja_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
         const hoja = yield connection_1.default('HojasRuta').where({ HojaRutaID: hoja_id }).first();
@@ -38,7 +40,7 @@ router.get('/:hoja_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.d
         next(err);
     }
 }));
-router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const fecha = req.params.fecha;
     try {
         const hojas = yield connection_1.default('HojasRuta').select('*').where({ Fecha: fecha });
@@ -48,7 +50,7 @@ router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.def
         next(err);
     }
 }));
-router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
         const hoja = (yield connection_1.default('HojasRuta').insert(values, '*'))[0];
@@ -59,7 +61,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
-router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     const values = utils_1.formatKeys(req.body, 'hoja_ruta_id');
     try {
@@ -77,7 +79,7 @@ router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default
         next(err);
     }
 }));
-router.delete('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.delete('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
         const deletedHoja = yield connection_1.default('HojasRuta').where({ HojaRutaID: hoja_id }).delete();
@@ -92,13 +94,13 @@ router.delete('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.defa
         next(err);
     }
 }));
-router.post('/:hoja_id/movimientos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/:hoja_id/movimientos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     const values = utils_1.formatKeys(req.body);
     try {
         const movimientos = yield connection_1.default('MovimientosEnc').insert(values, '*');
         //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
-        res.status(200).json(movimientos);
+        res.status(200).json(movimientos || {});
     }
     catch (err) {
         next(err);

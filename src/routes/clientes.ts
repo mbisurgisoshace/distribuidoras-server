@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import * as express from 'express';
 
 import knex from '../db/connection';
@@ -291,7 +293,7 @@ router.get('/:cliente_id/last', authHelpers.ensureAuthenticated, authHelpers.ens
 				.innerJoin('MovimientosDet', 'MovimientosEnc.MovimientoEncID', 'MovimientosDet.MovimientoEncID')
 				.innerJoin('Envases', 'MovimientosDet.EnvaseID', 'Envases.EnvaseID')
 				.where('MovimientosEnc.MovimientoEncID', lastPedidoId[0])
-				.select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto');
+				.select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto', 'Envases.EnvaseID');
 
 			if (items && items.length > 0) {
 				items = items.map(i => {

@@ -1,13 +1,15 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+//@ts-nocheck
 const R = require("ramda");
 const moment = require("moment");
 const express = require("express");
@@ -16,7 +18,7 @@ const helpers_1 = require("../auth/helpers");
 const utils_1 = require("../utils/utils");
 const AuditoriaService_1 = require("../services/AuditoriaService");
 const router = express.Router();
-router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { withStock } = req.query;
     try {
         const comercios = yield connection_1.default('Comercios').select('*');
@@ -32,7 +34,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
-router.get('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const comercio_id = req.params.comercio_id;
     try {
         const comercio = yield connection_1.default('Comercios').where({ id: comercio_id }).first();
@@ -42,7 +44,7 @@ router.get('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers
         next(err);
     }
 }));
-router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     values.Estado = true;
     try {
@@ -55,7 +57,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
-router.put('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.put('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const comercio_id = req.params.comercio_id;
     const values = R.omit(['id'], req.body);
     try {
@@ -73,7 +75,7 @@ router.put('/:comercio_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers
         next(err);
     }
 }));
-router.get('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.get('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const pedidos = yield connection_1.default('PedidosComercios')
             .select('PedidosComercios.*', 'Comercios.razon_social', 'Comercios.calle', 'Comercios.altura', 'Comercios.telefono')
@@ -85,7 +87,7 @@ router.get('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.
         next(err);
     }
 }));
-router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
         const pedido = (yield connection_1.default('PedidosComercios').insert(values, '*'))[0];
@@ -97,11 +99,11 @@ router.post('/pedidos', helpers_1.default.ensureAuthenticated, helpers_1.default
         next(err);
     }
 }));
-router.post('/pedidos/entregar', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/pedidos/entregar', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const ids = req.body;
     try {
         const pedidos = yield connection_1.default('PedidosComercios').whereIn('id', ids);
-        yield Promise.all(pedidos.map((p) => __awaiter(this, void 0, void 0, function* () {
+        yield Promise.all(pedidos.map((p) => __awaiter(void 0, void 0, void 0, function* () {
             // Reducir stock punto de entrega
             const items = yield connection_1.default('MovimientosDet').where({ MovimientoEncID: p.movimiento_enc_id });
             const stock = items.map(i => ({
@@ -142,7 +144,7 @@ router.post('/pedidos/entregar', helpers_1.default.ensureAuthenticated, helpers_
         next(err);
     }
 }));
-router.post('/stock', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+router.post('/stock', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
         const stock = (yield connection_1.default('StockComercios').insert(values, '*'))[0];
