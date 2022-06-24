@@ -50,6 +50,16 @@ router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.def
         next(err);
     }
 }));
+router.get('/estado/:estado', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const estado = req.params.estado;
+    try {
+        const hojas = yield connection_1.default('HojasRuta').select('*').where({ Estado: estado });
+        res.status(200).json(utils_1.camelizeKeys(hojas));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {

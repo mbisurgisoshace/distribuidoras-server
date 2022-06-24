@@ -46,6 +46,17 @@ router.get('/fecha/:fecha', authHelpers.ensureAuthenticated, authHelpers.ensureI
     }
 });
 
+router.get('/estado/:estado', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+    const estado = req.params.estado;
+
+	try {
+        const hojas = await knex('HojasRuta').select('*').where({Estado: estado});
+        res.status(200).json(camelizeKeys(hojas));
+    } catch (err) {
+        next(err);
+    }
+});
+
 router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
     const values = formatKeys(req.body);
 
