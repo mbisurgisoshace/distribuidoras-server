@@ -26,6 +26,47 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
+router.post('/filter', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { currentPage, pageSize, filterText } = req.body;
+        const offset = (currentPage - 1) * pageSize;
+        let clientes = [];
+        let clientesCount = 0;
+        if (filterText) {
+            const query = connection_1.default('Clientes')
+                .select('ClienteID')
+                .whereRaw(`RazonSocial like '%${filterText}%'`)
+                .orWhereRaw(`Calle like '%${filterText}%'`)
+                .orWhereRaw(`Altura like '%${filterText}%'`);
+            const result = ((yield query) || []).map((res) => res.ClienteID);
+            clientes = yield connection_1.default.raw(`
+        WITH results AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ClienteID) as RowNum FROM Clientes WHERE ClienteID in (${result}))
+        SELECT * FROM results
+        WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
+      `);
+            clientesCount = yield connection_1.default('Clientes')
+                .count('ClienteID', { as: 'count' })
+                .whereIn('ClienteID', result);
+        }
+        else {
+            clientes = yield connection_1.default.raw(`
+        WITH results AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ClienteID) as RowNum FROM Clientes)
+        SELECT * FROM results
+        WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
+      `);
+            clientesCount = yield connection_1.default('Clientes').count('ClienteID', { as: 'count' });
+        }
+        res.status(200).json({
+            pageSize,
+            currentPage,
+            total: clientesCount[0][''],
+            clientes: utils_1.camelizeKeys(clientes),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = req.body;
     try {
@@ -63,9 +104,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
                 if (filters.rango_fechas.start && filters.rango_fechas.end) {
                     const desde = moment(filters.rango_fechas.start, 'DD-MM-YYYY').format('YYYY-MM-DD');
                     const hasta = moment(filters.rango_fechas.end, 'DD-MM-YYYY').format('YYYY-MM-DD');
-                    this
-                        .andWhere('MovimientosEnc.Fecha', '>=', desde)
-                        .andWhere('MovimientosEnc.Fecha', '<=', hasta);
+                    this.andWhere('MovimientosEnc.Fecha', '>=', desde).andWhere('MovimientosEnc.Fecha', '<=', hasta);
                 }
                 else {
                     if (filters.rango_fechas.start) {
@@ -87,7 +126,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         //   .filter(val => val);
         let innerResult = ((yield query) || [])
             .map((res) => res.MovimientoEncID)
-            .filter(val => val);
+            .filter((val) => val);
         console.log('innerResult', innerResult);
         let query_comercial = connection_1.default('MovimientosEnc')
             .leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
@@ -96,17 +135,15 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
             .distinct('MovimientosEnc.ClienteID')
             .groupBy('MovimientosEnc.ClienteID');
         if (filters.tipo_producto) {
-            query_comercial = connection_1.default('viewTotalesPorTipoEnvase')
-                .whereIn('MovimientoEncID', innerResult);
-            if (filters.tipo_producto.butano && (filters.tipo_producto.butano.min || filters.tipo_producto.butano.max)) {
+            query_comercial = connection_1.default('viewTotalesPorTipoEnvase').whereIn('MovimientoEncID', innerResult);
+            if (filters.tipo_producto.butano &&
+                (filters.tipo_producto.butano.min || filters.tipo_producto.butano.max)) {
                 query_comercial = query_comercial.andWhere(function () {
                     this.andWhere('TipoEnvaseID', 1);
                     if (filters.tipo_producto.butano.min && filters.tipo_producto.butano.max) {
                         const min = filters.tipo_producto.butano.min;
                         const max = filters.tipo_producto.butano.max;
-                        this
-                            .andWhere('TotalKilos', '>=', min)
-                            .andWhere('TotalKilos', '<=', max);
+                        this.andWhere('TotalKilos', '>=', min).andWhere('TotalKilos', '<=', max);
                     }
                     else {
                         if (filters.tipo_producto.butano.min) {
@@ -120,15 +157,14 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
                     }
                 });
             }
-            if (filters.tipo_producto.propano && (filters.tipo_producto.propano.min || filters.tipo_producto.propano.max)) {
+            if (filters.tipo_producto.propano &&
+                (filters.tipo_producto.propano.min || filters.tipo_producto.propano.max)) {
                 query_comercial = query_comercial.andWhere(function () {
                     this.andWhere('TipoEnvaseID', 2);
                     if (filters.tipo_producto.propano.min && filters.tipo_producto.propano.max) {
                         const min = filters.tipo_producto.propano.min;
                         const max = filters.tipo_producto.propano.max;
-                        this
-                            .andWhere('TotalKilos', '>=', min)
-                            .andWhere('TotalKilos', '<=', max);
+                        this.andWhere('TotalKilos', '>=', min).andWhere('TotalKilos', '<=', max);
                     }
                     else {
                         if (filters.tipo_producto.propano.min) {
@@ -148,7 +184,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         console.log('knex query_comercial string: ', query_comercial.toString());
         let outerResult = ((yield query_comercial) || [])
             .map((res) => res.ClienteID)
-            .filter(val => val);
+            .filter((val) => val);
         console.log('outerResult', outerResult);
         //const result = await knex('Clientes').whereIn('ClienteID', innerResult);
         const result = yield connection_1.default('Clientes').whereIn('ClienteID', outerResult);
@@ -186,7 +222,7 @@ router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.defaul
         const zonasSub = yield connection_1.default('ZonasSub').where({ ZonaID: zonaId }).select('*');
         const clientes = yield connection_1.default('Plantillas')
             .innerJoin('Clientes', 'Clientes.ClienteID', 'Plantillas.ClienteID')
-            .whereIn('Clientes.ZonaSubID', zonasSub.map(zs => zs.SubZonaID))
+            .whereIn('Clientes.ZonaSubID', zonasSub.map((zs) => zs.SubZonaID))
             .andWhere('DiaSemana', diaSemana)
             .select('Clientes.*');
         res.status(200).json(utils_1.camelizeKeys(clientes));
@@ -266,14 +302,14 @@ router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1
                 .where('MovimientosEnc.MovimientoEncID', lastPedidoId[0])
                 .select('EnvaseCodigo', 'EnvaseNombre', 'Cantidad', 'Monto', 'Envases.EnvaseID');
             if (items && items.length > 0) {
-                items = items.map(i => {
+                items = items.map((i) => {
                     let precio = i.Monto / i.Cantidad;
                     return Object.assign(Object.assign({}, i), { precio });
                 });
             }
             let lastPedido = {
                 pedido_id: lastPedidoId[0],
-                items: utils_1.camelizeKeys(items)
+                items: utils_1.camelizeKeys(items),
             };
             res.status(200).json(lastPedido);
         }
