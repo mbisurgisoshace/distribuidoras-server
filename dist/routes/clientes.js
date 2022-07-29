@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
-router.post('/filter', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { currentPage, pageSize, filterText } = req.body;
         const offset = (currentPage - 1) * pageSize;

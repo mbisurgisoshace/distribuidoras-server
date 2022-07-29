@@ -24,50 +24,55 @@ router.get(
   }
 );
 
-router.post('/filter', async (req, res, next) => {
-  try {
-    const { currentPage, pageSize, filterText } = req.body;
-    const offset = (currentPage - 1) * pageSize;
+router.post(
+  '/filter',
+  authHelpers.ensureAuthenticated,
+  authHelpers.ensureIsUser,
+  async (req, res, next) => {
+    try {
+      const { currentPage, pageSize, filterText } = req.body;
+      const offset = (currentPage - 1) * pageSize;
 
-    let clientes = [];
-    let clientesCount = 0;
+      let clientes = [];
+      let clientesCount = 0;
 
-    if (filterText) {
-      const query = knex('Clientes')
-        .select('ClienteID')
-        .whereRaw(`RazonSocial like '%${filterText}%'`)
-        .orWhereRaw(`Calle like '%${filterText}%'`)
-        .orWhereRaw(`Altura like '%${filterText}%'`);
+      if (filterText) {
+        const query = knex('Clientes')
+          .select('ClienteID')
+          .whereRaw(`RazonSocial like '%${filterText}%'`)
+          .orWhereRaw(`Calle like '%${filterText}%'`)
+          .orWhereRaw(`Altura like '%${filterText}%'`);
 
-      const result = ((await query) || []).map((res: any) => res.ClienteID);
+        const result = ((await query) || []).map((res: any) => res.ClienteID);
 
-      clientes = await knex.raw(`
+        clientes = await knex.raw(`
         WITH results AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ClienteID) as RowNum FROM Clientes WHERE ClienteID in (${result}))
         SELECT * FROM results
         WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
       `);
-      clientesCount = await knex('Clientes')
-        .count('ClienteID', { as: 'count' })
-        .whereIn('ClienteID', result);
-    } else {
-      clientes = await knex.raw(`
+        clientesCount = await knex('Clientes')
+          .count('ClienteID', { as: 'count' })
+          .whereIn('ClienteID', result);
+      } else {
+        clientes = await knex.raw(`
         WITH results AS (SELECT *, ROW_NUMBER() OVER (ORDER BY ClienteID) as RowNum FROM Clientes)
         SELECT * FROM results
         WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
       `);
-      clientesCount = await knex('Clientes').count('ClienteID', { as: 'count' });
-    }
+        clientesCount = await knex('Clientes').count('ClienteID', { as: 'count' });
+      }
 
-    res.status(200).json({
-      pageSize,
-      currentPage,
-      total: clientesCount[0][''],
-      clientes: camelizeKeys(clientes),
-    });
-  } catch (err) {
-    next(err);
+      res.status(200).json({
+        pageSize,
+        currentPage,
+        total: clientesCount[0][''],
+        clientes: camelizeKeys(clientes),
+      });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 router.post(
   '/search',
