@@ -24,6 +24,7 @@ const feriados_1 = require("./routes/feriados");
 const comercios_1 = require("./routes/comercios");
 const comodatos_1 = require("./routes/comodatos");
 const objetivos_1 = require("./routes/objetivos");
+const plantillas_1 = require("./routes/plantillas");
 const movimientos_1 = require("./routes/movimientos");
 const tiposEnvase_1 = require("./routes/tiposEnvase");
 const estadosEnvase_1 = require("./routes/estadosEnvase");
@@ -72,6 +73,7 @@ class App {
         this.express.use('/comercios', comercios_1.default);
         this.express.use('/comodatos', comodatos_1.default);
         this.express.use('/objetivos', objetivos_1.default);
+        this.express.use('/plantillas', plantillas_1.default);
         this.express.use('/tiposEnvase', tiposEnvase_1.default);
         this.express.use('/movimientos', movimientos_1.default);
         this.express.use('/estadosEnvase', estadosEnvase_1.default);
