@@ -317,6 +317,56 @@ router.get(
   }
 );
 
+router.get(
+  '/:cliente_id(\\d+)/lastPedidos',
+  authHelpers.ensureAuthenticated,
+  authHelpers.ensureIsUser,
+  async (req, res, next) => {
+    const cliente_id = req.params.cliente_id;
+    try {
+      const ultimosPedidos = await knex('MovimientosEnc')
+        .limit(5)
+        .sum('MovimientosDet.Monto as Total')
+        .select(
+          'MovimientosEnc.MovimientoEncID',
+          'MovimientosEnc.Fecha',
+          'MovimientosTipo.TipoMovimientoNombre',
+          'CondicionesVenta.CondicionVentaNombre',
+          'MovimientosDet.Monto'
+        )
+        .orderBy('Fecha', 'desc')
+        .innerJoin(
+          'MovimientosTipo',
+          'MovimientosTipo.TipoMovimientoID',
+          'MovimientosEnc.TipoMovimientoID'
+        )
+        .innerJoin(
+          'CondicionesVenta',
+          'CondicionesVenta.CondicionVentaID',
+          'MovimientosEnc.CondicionVentaID'
+        )
+        .innerJoin(
+          'MovimientosDet',
+          'MovimientosDet.MovimientoEncID',
+          'MovimientosEnc.MovimientoEncID'
+        )
+        .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
+        .where({ ClienteID: cliente_id, EstadoMovimientoID: 3 })
+        .groupBy(
+          'MovimientosEnc.MovimientoEncID',
+          'MovimientosEnc.Fecha',
+          'MovimientosTipo.TipoMovimientoNombre',
+          'CondicionesVenta.CondicionVentaNombre',
+          'MovimientosDet.Monto'
+        );
+
+      res.status(200).json(camelizeKeys(ultimosPedidos));
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.post(
   '/',
   authHelpers.ensureAuthenticated,

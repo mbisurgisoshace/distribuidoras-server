@@ -240,6 +240,26 @@ router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ens
         next(err);
     }
 }));
+router.get('/:cliente_id(\\d+)/lastPedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const cliente_id = req.params.cliente_id;
+    try {
+        const ultimosPedidos = yield connection_1.default('MovimientosEnc')
+            .limit(5)
+            .sum('MovimientosDet.Monto as Total')
+            .select('MovimientosEnc.MovimientoEncID', 'MovimientosEnc.Fecha', 'MovimientosTipo.TipoMovimientoNombre', 'CondicionesVenta.CondicionVentaNombre', 'MovimientosDet.Monto')
+            .orderBy('Fecha', 'desc')
+            .innerJoin('MovimientosTipo', 'MovimientosTipo.TipoMovimientoID', 'MovimientosEnc.TipoMovimientoID')
+            .innerJoin('CondicionesVenta', 'CondicionesVenta.CondicionVentaID', 'MovimientosEnc.CondicionVentaID')
+            .innerJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
+            .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
+            .where({ ClienteID: cliente_id, EstadoMovimientoID: 3 })
+            .groupBy('MovimientosEnc.MovimientoEncID', 'MovimientosEnc.Fecha', 'MovimientosTipo.TipoMovimientoNombre', 'CondicionesVenta.CondicionVentaNombre', 'MovimientosDet.Monto');
+        res.status(200).json(utils_1.camelizeKeys(ultimosPedidos));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body, 'cliente_id');
     values.Estado = true;
