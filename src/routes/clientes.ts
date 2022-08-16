@@ -377,7 +377,9 @@ router.post(
     values.Estado = true;
 
     try {
-      const cliente = (await knex('Clientes').insert(values, '*'))[0];
+      const cliente = (
+        await knex('Clientes').insert(values, '*', { includeTriggerModifications: true })
+      )[0];
       AuditoriaService.log(
         'clientes',
         cliente.ClienteID,
