@@ -40,6 +40,7 @@ router.post(
         const query = knex('Clientes')
           .select('ClienteID')
           .whereRaw(`RazonSocial like '%${filterText}%'`)
+          .orWhereRaw(`ClienteID like '%${filterText}%'`)
           .orWhereRaw(`Calle like '%${filterText}%'`)
           .orWhereRaw(`Altura like '%${filterText}%'`);
 
