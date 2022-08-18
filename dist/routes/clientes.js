@@ -36,6 +36,7 @@ router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.
             const query = connection_1.default('Clientes')
                 .select('ClienteID')
                 .whereRaw(`RazonSocial like '%${filterText}%'`)
+                .orWhereRaw(`ClienteID like '%${filterText}%'`)
                 .orWhereRaw(`Calle like '%${filterText}%'`)
                 .orWhereRaw(`Altura like '%${filterText}%'`);
             const result = ((yield query) || []).map((res) => res.ClienteID);
@@ -264,7 +265,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
     const values = utils_1.formatKeys(req.body, 'cliente_id');
     values.Estado = true;
     try {
-        const cliente = (yield connection_1.default('Clientes').insert(values, '*'))[0];
+        const cliente = (yield connection_1.default('Clientes').insert(values, '*', { includeTriggerModifications: true }))[0];
         AuditoriaService_1.default.log('clientes', cliente.ClienteID, JSON.stringify(cliente), 'insert', req.user.username);
         res.status(200).json(utils_1.camelizeKeys(cliente));
     }
