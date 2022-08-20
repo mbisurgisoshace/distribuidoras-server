@@ -9,6 +9,7 @@ const stock_1 = require("./routes/stock");
 const tango_1 = require("./routes/tango");
 const hojas_1 = require("./routes/hojas");
 const zonas_1 = require("./routes/zonas");
+const tablas_1 = require("./routes/tablas");
 const cargas_1 = require("./routes/cargas");
 const precios_1 = require("./routes/precios");
 const envases_1 = require("./routes/envases");
@@ -58,6 +59,7 @@ class App {
         this.express.use('/hojas', hojas_1.default);
         this.express.use('/zonas', zonas_1.default);
         this.express.use('/tango', tango_1.default);
+        this.express.use('/tablas', tablas_1.default);
         this.express.use('/cargas', cargas_1.default);
         this.express.use('/precios', precios_1.default);
         this.express.use('/envases', envases_1.default);

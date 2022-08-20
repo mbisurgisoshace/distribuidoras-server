@@ -9,6 +9,7 @@ import stock from './routes/stock';
 import tango from './routes/tango';
 import hojas from './routes/hojas';
 import zonas from './routes/zonas';
+import tablas from './routes/tablas';
 import cargas from './routes/cargas';
 import precios from './routes/precios';
 import envases from './routes/envases';
@@ -66,6 +67,7 @@ class App {
     this.express.use('/hojas', hojas);
     this.express.use('/zonas', zonas);
     this.express.use('/tango', tango);
+    this.express.use('/tablas', tablas);
     this.express.use('/cargas', cargas);
     this.express.use('/precios', precios);
     this.express.use('/envases', envases);
