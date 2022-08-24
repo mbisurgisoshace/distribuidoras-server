@@ -17,6 +17,7 @@ const TABLES_MAP = {
   tiposMovimiento: 'MovimientosTipo',
   estadosMovimiento: 'MovimientosEstado',
   motivos: 'Motivos',
+  envases: 'Envases',
 };
 
 const QUERY_TABLES = [
@@ -30,6 +31,7 @@ const QUERY_TABLES = [
   'tiposMovimiento',
   'estadosMovimiento',
   'motivos',
+  'envases',
 ];
 
 router.get(
