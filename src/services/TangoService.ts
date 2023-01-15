@@ -4,7 +4,8 @@ import crmKnex from '../db/connection';
 import * as process from 'process';
 
 const TALONARIO_REMITOS = process.env.TALONARIO_REMITOS || '2';
-const TANGO_DB = process.env.TANGO_DB || 'mssql://sa:Axoft1988@centrocompartido.engux.com.ar:1550/ByB_Gestion';
+const TANGO_DB =
+  process.env.TANGO_DB || 'mssql://sa:Axoft1988@centrocompartido.engux.com.ar:1550/ByB_Gestion';
 //const TANGO_DB = process.env.TANGO_DB || 'mssql://sa:Axoft1988@centrocompartido.engux.com.ar:1550/Mediterranea_de_Gas_Gestion';
 const COD_PROVIN = process.env.COD_PROVIN || '01';
 const ID_GVA_18 = process.env.ID_GVA_18 || '2';
@@ -14,8 +15,8 @@ const tangoKnex = knex({
   connection: TANGO_DB,
   pool: {
     min: 2,
-    max: 10
-  }
+    max: 10,
+  },
 });
 
 export default class TangoService {
@@ -27,17 +28,23 @@ export default class TangoService {
       console.log('clienteTango', clienteTango);
       console.log('clienteTangoId', clienteTangoId);
       try {
-        await tangoKnex.transaction(async trx => {
+        await tangoKnex.transaction(async (trx) => {
           await trx('GVA14').insert(clienteTango);
 
           const proximoIdEntrega = await this.getProximoIdDireccionEntrega();
           console.log('proximoIdEntrega', proximoIdEntrega);
-          const domicilioEntregaTango = this.crearDomicilioEntrega(clienteTangoId, clienteCrm, proximoIdEntrega);
+          const domicilioEntregaTango = this.crearDomicilioEntrega(
+            clienteTangoId,
+            clienteCrm,
+            proximoIdEntrega
+          );
           console.log('domicilioEntregaTango', domicilioEntregaTango);
-          await trx('DIRECCION_ENTREGA').insert(domicilioEntregaTango)
+          await trx('DIRECCION_ENTREGA').insert(domicilioEntregaTango);
         });
 
-        await crmKnex('Clientes').update({Sincronizado: 1}).where({ClienteID: clienteCrm.ClienteID});
+        await crmKnex('Clientes')
+          .update({ Sincronizado: 1 })
+          .where({ ClienteID: clienteCrm.ClienteID });
       } catch (err) {
         console.log('err', err);
         throw err;
@@ -47,10 +54,16 @@ export default class TangoService {
 
   public static async syncRemitos(remitosCrm: Array<any>) {
     try {
-
       for (let i = 0; i < remitosCrm.length; i++) {
         const remitoCrm = remitosCrm[i];
         console.log('remitoCrm', remitoCrm);
+        const remitoTangoExist = await tangoKnex('STA14')
+          .select('*')
+          .where({ N_REMITO: remitoCrm.nroRemito })
+          .first();
+        console.log('remitoTangoExist', remitoTangoExist);
+        if (remitoTangoExist) continue;
+
         const proximoInterno = await this.getProximoNroInterno();
         const direccionEntrega = await this.getDireccionEntrega(remitoCrm.cliente);
         const remitoTangoEnc = {
@@ -65,12 +78,12 @@ export default class TangoService {
           TALONARIO: parseInt(TALONARIO_REMITOS),
           TCOMP_IN_S: 'RE',
           COD_TRANSP: '2',
-          ID_DIRECCION_ENTREGA: direccionEntrega
-        }
+          ID_DIRECCION_ENTREGA: direccionEntrega,
+        };
         console.log('remitoTangoEnc', remitoTangoEnc);
         let renglon = 0;
 
-        const items = remitoCrm.items.map(item => {
+        const items = remitoCrm.items.map((item) => {
           renglon++;
 
           return {
@@ -87,19 +100,17 @@ export default class TangoService {
             PRECIO_REM: remitoCrm.total,
             TCOMP_IN_S: 'RE',
             TIPO_MOV: 'S',
-            UNIDAD_MEDIDA_SELECCIONADA: 'P'
-          }
-        })
+            UNIDAD_MEDIDA_SELECCIONADA: 'P',
+          };
+        });
         console.log('items', items);
-        await tangoKnex.transaction(async trx => {
-          await trx('STA14')
-            .insert(remitoTangoEnc);
+        await tangoKnex.transaction(async (trx) => {
+          await trx('STA14').insert(remitoTangoEnc);
 
-          await trx('STA20')
-            .insert(items);
+          await trx('STA20').insert(items);
 
-          await crmKnex('Remitos').update({Sincronizado: 1}).where({RemitoID: remitoCrm.id});
-        })
+          await crmKnex('Remitos').update({ Sincronizado: 1 }).where({ RemitoID: remitoCrm.id });
+        });
       }
     } catch (err) {
       console.log('err', err);
@@ -111,28 +122,27 @@ export default class TangoService {
       const facturacion = await tangoKnex('GVA53')
         .select('*')
         .whereBetween('FECHA_MOV', [desde, hasta])
-        .andWhere({TCOMP_IN_V: 'FC'});
-      
+        .andWhere({ TCOMP_IN_V: 'FC' });
+
       return facturacion;
     } catch (err) {
-      console.log('err', err)
+      console.log('err', err);
     }
   }
 
   public static async getRemitosPendientes(desde, hasta) {
     try {
       const remitosPendientes = await tangoKnex('STA20')
-      .whereBetween('FECHA_MOV', [desde, hasta])
-      .andWhere({TCOMP_IN_S: 'RE'});
+        .whereBetween('FECHA_MOV', [desde, hasta])
+        .andWhere({ TCOMP_IN_S: 'RE' });
 
       return remitosPendientes;
     } catch (err) {
-      console.log('err', err)
+      console.log('err', err);
     }
   }
 
   private static crearClienteTango(clienteCrm, clienteTangoId) {
-
     return {
       COD_CLIENT: clienteCrm.ClienteID,
       COD_PROVIN: COD_PROVIN,
@@ -158,7 +168,7 @@ export default class TangoService {
       COD_GVA14: clienteCrm.ClienteID,
       ID_CATEGORIA_IVA: this.crearCategoriaIva(clienteCrm.CondicionIvaID),
       ID_GVA14: clienteTangoId,
-      ID_GVA18: parseInt(ID_GVA_18)
+      ID_GVA18: parseInt(ID_GVA_18),
     };
   }
 
@@ -175,8 +185,8 @@ export default class TangoService {
       HABILITADO: 'S',
       TELEFONO1: clienteCrm.Telefono,
       ID_GVA14: clienteTangoId,
-      ID_GVA18: parseInt(ID_GVA_18)
-    }
+      ID_GVA18: parseInt(ID_GVA_18),
+    };
   }
 
   private static crearCondicionVenta(condicionVta) {
@@ -184,7 +194,7 @@ export default class TangoService {
       case 1: // Contado
         return 1;
       default: // Condiciones de No Contado
-        return 2
+        return 2;
     }
   }
 
@@ -230,7 +240,7 @@ export default class TangoService {
   private static async getProximoNroInterno() {
     const ultimoInterno = await tangoKnex('STA14')
       .select('NCOMP_IN_S')
-      .where({TCOMP_IN_S: 'RE'})
+      .where({ TCOMP_IN_S: 'RE' })
       .orderBy('ID_STA14', 'desc')
       .first();
     console.log('ultimoInterno', ultimoInterno);
@@ -242,14 +252,14 @@ export default class TangoService {
   private static async getDireccionEntrega(clienteId) {
     const direccionEntrega = await tangoKnex('DIRECCION_ENTREGA')
       .select('ID_DIRECCION_ENTREGA')
-      .where({COD_CLIENTE: clienteId})
+      .where({ COD_CLIENTE: clienteId })
       .first();
 
     return direccionEntrega.ID_DIRECCION_ENTREGA;
   }
 
   private static async getProximoIdClienteTango() {
-    const proximoId = await tangoKnex.raw('SELECT NEXT VALUE FOR sequence_gva14')
+    const proximoId = await tangoKnex.raw('SELECT NEXT VALUE FOR sequence_gva14');
     return proximoId[0][''];
   }
 

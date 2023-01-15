@@ -4,6 +4,7 @@ import * as express from 'express';
 import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
 import { camelizeKeys, formatKeys } from '../utils/utils';
+import { shouldAllowUpdate } from '../utils/movimientosMiddleware';
 
 const router = express.Router();
 
@@ -222,6 +223,7 @@ router.put(
   '/:movimiento_enc_id',
   authHelpers.ensureAuthenticated,
   authHelpers.ensureIsUser,
+  //shouldAllowUpdate,
   async (req, res, next) => {
     const values: any = formatKeys(req.body);
 
