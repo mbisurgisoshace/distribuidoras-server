@@ -426,7 +426,7 @@ router.post(
   authHelpers.ensureIsUser,
   async (req, res, next) => {
     const values: any = formatKeys(req.body, 'cliente_id');
-    values.Estado = true;
+    values.estado = true;
 
     try {
       const cliente = (
