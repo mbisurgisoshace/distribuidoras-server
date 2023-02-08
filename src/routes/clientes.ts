@@ -24,6 +24,58 @@ router.get(
   }
 );
 
+router.get(
+  '/search',
+  authHelpers.ensureAuthenticated,
+  authHelpers.ensureIsUser,
+  async (req, res, next) => {
+    try {
+      let clientes = [];
+      const queryString: string = req.query.query;
+
+      if (!queryString) res.status(200).send([]);
+
+      if (queryString[0] === '-' && queryString[1]) {
+        const filter = queryString[1];
+
+        if (queryString.length > 3) {
+          const search = queryString.substring(3, queryString.length);
+
+          if (filter === 'a') {
+            clientes = await knex('Clientes').whereRaw('Altura like ?', [`%${search}%`]);
+          }
+
+          if (filter === 'c') {
+            clientes = await knex('Clientes').whereRaw('Calle like ?', [`%${search}%`]);
+          }
+
+          if (filter === 'r') {
+            clientes = await knex('Clientes').whereRaw('RazonSocial like ?', [`%${search}%`]);
+          }
+
+          if (filter === 't') {
+            clientes = await knex('Clientes').whereRaw('Telefono like ?', [`%${search}%`]);
+          }
+        }
+      }
+
+      if (queryString[0] !== '-' && queryString[1]) {
+        const search = queryString;
+        clientes = await knex('Clientes')
+          .whereRaw('Altura like ?', [`%${search}%`])
+          .orWhereRaw('Calle like ?', [`%${search}%`])
+          .orWhereRaw('RazonSocial like ?', [`%${search}%`])
+          .orWhereRaw('Telefono like ?', [`%${search}%`])
+          .orWhereRaw('ClienteID like ?', [`%${search}%`]);
+      }
+
+      res.status(200).send(camelizeKeys(clientes));
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.post(
   '/filter',
   authHelpers.ensureAuthenticated,
@@ -374,7 +426,7 @@ router.post(
   authHelpers.ensureIsUser,
   async (req, res, next) => {
     const values: any = formatKeys(req.body, 'cliente_id');
-    values.Estado = true;
+    values.estado = true;
 
     try {
       const cliente = (

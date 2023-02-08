@@ -26,6 +26,45 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
         next(err);
     }
 }));
+router.get('/search', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let clientes = [];
+        const queryString = req.query.query;
+        if (!queryString)
+            res.status(200).send([]);
+        if (queryString[0] === '-' && queryString[1]) {
+            const filter = queryString[1];
+            if (queryString.length > 3) {
+                const search = queryString.substring(3, queryString.length);
+                if (filter === 'a') {
+                    clientes = yield connection_1.default('Clientes').whereRaw('Altura like ?', [`%${search}%`]);
+                }
+                if (filter === 'c') {
+                    clientes = yield connection_1.default('Clientes').whereRaw('Calle like ?', [`%${search}%`]);
+                }
+                if (filter === 'r') {
+                    clientes = yield connection_1.default('Clientes').whereRaw('RazonSocial like ?', [`%${search}%`]);
+                }
+                if (filter === 't') {
+                    clientes = yield connection_1.default('Clientes').whereRaw('Telefono like ?', [`%${search}%`]);
+                }
+            }
+        }
+        if (queryString[0] !== '-' && queryString[1]) {
+            const search = queryString;
+            clientes = yield connection_1.default('Clientes')
+                .whereRaw('Altura like ?', [`%${search}%`])
+                .orWhereRaw('Calle like ?', [`%${search}%`])
+                .orWhereRaw('RazonSocial like ?', [`%${search}%`])
+                .orWhereRaw('Telefono like ?', [`%${search}%`])
+                .orWhereRaw('ClienteID like ?', [`%${search}%`]);
+        }
+        res.status(200).send(utils_1.camelizeKeys(clientes));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { currentPage, pageSize, filterText } = req.body;

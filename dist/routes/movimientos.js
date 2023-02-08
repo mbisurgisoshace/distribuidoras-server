@@ -166,7 +166,9 @@ router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpe
         next(err);
     }
 }));
-router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, 
+//shouldAllowUpdate,
+(req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
         for (let i = 0; i < values.length; i++) {
