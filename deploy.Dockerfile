@@ -5,7 +5,7 @@ WORKDIR /app
 ADD . /app/
 
 RUN npm install -g nodemon typescript && \
-  yarn install
+  yarn install --ignore-engines
 RUN yarn build
 
 FROM node:10-slim
@@ -47,7 +47,7 @@ RUN echo "deb http://deb.debian.org/debian jessie main\ndeb http://security.debi
 
 USER pptruser
 
-RUN yarn install --production
+RUN yarn install --ignore-engines --production
 
 ADD ./src/config /app/dist/config
 ADD ./src/knexfile.js /app/dist/knexfile.js

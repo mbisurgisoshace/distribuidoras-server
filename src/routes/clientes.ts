@@ -16,7 +16,7 @@ router.get(
   authHelpers.ensureIsUser,
   async (req, res, next) => {
     try {
-      const clientes = await knex('Clientes').select('*');
+      const clientes = await knex('Clientes').select('*').where({ Estado: true });
       res.status(200).json(camelizeKeys(clientes));
     } catch (err) {
       next(err);

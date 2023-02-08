@@ -19,7 +19,7 @@ const moment = require("moment");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const clientes = yield connection_1.default('Clientes').select('*');
+        const clientes = yield connection_1.default('Clientes').select('*').where({ Estado: true });
         res.status(200).json(utils_1.camelizeKeys(clientes));
     }
     catch (err) {
