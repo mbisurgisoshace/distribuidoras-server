@@ -19,11 +19,14 @@ const AuditoriaService_1 = require("../services/AuditoriaService");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const today = moment().format('YYYY-MM-DD');
+        let fecha = req.query.fecha;
+        if (!fecha)
+            fecha = moment().format('YYYY-MM-DD');
+        //const today = moment().format('YYYY-MM-DD');
         const hojas = yield connection_1.default('HojasRuta')
             .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
             .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
-            .where({ Fecha: today });
+            .where({ Fecha: fecha });
         res.status(200).json(utils_1.camelizeKeys(hojas));
     }
     catch (err) {
@@ -33,7 +36,11 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.get('/:hoja_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
-        const hoja = yield connection_1.default('HojasRuta').where({ HojaRutaID: hoja_id }).first();
+        const hoja = yield connection_1.default('HojasRuta')
+            .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
+            .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
+            .where({ HojaRutaID: hoja_id })
+            .first();
         res.status(200).json(utils_1.camelizeKeys(hoja));
     }
     catch (err) {
