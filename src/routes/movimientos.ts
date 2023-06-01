@@ -5,6 +5,7 @@ import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
 import { camelizeKeys, formatKeys } from '../utils/utils';
 import { shouldAllowUpdate } from '../utils/movimientosMiddleware';
+import PedidoService from '../services/PedidoService';
 
 const router = express.Router();
 
@@ -171,8 +172,13 @@ router.post(
     const values: any = formatKeys(req.body);
 
     try {
-      const movimiento = (await knex('MovimientosEnc').insert(values, '*'))[0];
-      res.status(200).json(camelizeKeys(movimiento));
+      //const movimiento = (await knex('MovimientosEnc').insert(values, '*'))[0];
+      const newPedidoId = await PedidoService.insertarPedido(values);
+      if (!newPedidoId) {
+        throw new Error('Ha ocurrido un error al generar el pedido.')
+      }
+
+      res.status(200).json(newPedidoId);
     } catch (err) {
       console.log('err', err);
       next(err);

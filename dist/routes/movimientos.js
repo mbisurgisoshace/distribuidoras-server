@@ -14,6 +14,7 @@ const express = require("express");
 const connection_1 = require("../db/connection");
 const helpers_1 = require("../auth/helpers");
 const utils_1 = require("../utils/utils");
+const PedidoService_1 = require("../services/PedidoService");
 const router = express.Router();
 router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
@@ -132,8 +133,12 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = utils_1.formatKeys(req.body);
     try {
-        const movimiento = (yield connection_1.default('MovimientosEnc').insert(values, '*'))[0];
-        res.status(200).json(utils_1.camelizeKeys(movimiento));
+        //const movimiento = (await knex('MovimientosEnc').insert(values, '*'))[0];
+        const newPedidoId = yield PedidoService_1.default.insertarPedido(values);
+        if (!newPedidoId) {
+            throw new Error('Ha ocurrido un error al generar el pedido.');
+        }
+        res.status(200).json(newPedidoId);
     }
     catch (err) {
         console.log('err', err);

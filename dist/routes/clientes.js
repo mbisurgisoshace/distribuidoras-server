@@ -57,7 +57,9 @@ router.get('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.e
                 .orWhereRaw('Calle like ?', [`%${search}%`])
                 .orWhereRaw('RazonSocial like ?', [`%${search}%`])
                 .orWhereRaw('Telefono like ?', [`%${search}%`])
-                .orWhereRaw('ClienteID like ?', [`%${search}%`]);
+                .orWhereRaw('ClienteID like ?', [`%${search}%`])
+                .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+                .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
         }
         res.status(200).send(utils_1.camelizeKeys(clientes));
     }

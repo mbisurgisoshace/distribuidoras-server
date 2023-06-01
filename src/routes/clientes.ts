@@ -66,7 +66,9 @@ router.get(
           .orWhereRaw('Calle like ?', [`%${search}%`])
           .orWhereRaw('RazonSocial like ?', [`%${search}%`])
           .orWhereRaw('Telefono like ?', [`%${search}%`])
-          .orWhereRaw('ClienteID like ?', [`%${search}%`]);
+          .orWhereRaw('ClienteID like ?', [`%${search}%`])
+          .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+          .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
       }
 
       res.status(200).send(camelizeKeys(clientes));

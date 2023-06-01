@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const R = require("ramda");
 const moment = require("moment");
 const express = require("express");
 const connection_1 = require("../db/connection");
@@ -60,7 +61,8 @@ router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.def
 router.get('/estado/:estado', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const estado = req.params.estado;
     try {
-        const hojas = yield connection_1.default('HojasRuta').select('*').where({ Estado: estado });
+        const hojas = yield connection_1.default('HojasRuta').select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido').where({ Estado: estado })
+            .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID');
         res.status(200).json(utils_1.camelizeKeys(hojas));
     }
     catch (err) {
@@ -80,7 +82,8 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
 }));
 router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
-    const values = utils_1.formatKeys(req.body, 'hoja_ruta_id');
+    let values = utils_1.formatKeys(req.body, 'hoja_ruta_id');
+    values = R.omit(['apellido', 'nombre'], values);
     try {
         const hoja = yield connection_1.default('HojasRuta').where({ HojaRutaID: hoja_id }).first();
         if (hoja) {

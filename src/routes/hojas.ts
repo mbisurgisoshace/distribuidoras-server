@@ -1,5 +1,6 @@
 //@ts-nocheck
 
+import * as R from 'ramda';
 import * as moment from 'moment';
 import * as express from 'express';
 
@@ -75,7 +76,8 @@ router.get(
     const estado = req.params.estado;
 
     try {
-      const hojas = await knex('HojasRuta').select('*').where({ Estado: estado });
+      const hojas = await knex('HojasRuta').select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido').where({ Estado: estado })
+        .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID');
       res.status(200).json(camelizeKeys(hojas));
     } catch (err) {
       next(err);
@@ -112,7 +114,8 @@ router.put(
   authHelpers.ensureIsUser,
   async (req, res, next) => {
     const hoja_id = req.params.hoja_id;
-    const values: any = formatKeys(req.body, 'hoja_ruta_id');
+    let values: any = formatKeys(req.body, 'hoja_ruta_id');
+    values = R.omit(['apellido', 'nombre'], values);
 
     try {
       const hoja = await knex('HojasRuta').where({ HojaRutaID: hoja_id }).first();
