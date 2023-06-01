@@ -26,7 +26,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 	}
 });
 
-router.put('/camion_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.put('/camion_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req: express.Request<any>, res, next) => {
 	const camion_id = req.params.camion_id;
 	const values = req.body;
 
@@ -44,7 +44,7 @@ router.put('/camion_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUs
 	}
 });
 
-router.delete('/camion_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.delete('/camion_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req:express.Request<any>, res, next) => {
 	const camion_id = req.params.camion_id;
 
 	try {

@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const canales = yield connection_1.default('Canales').select('*');
-        res.status(200).json(utils_1.camelizeKeys(canales));
+        const canales = yield (0, connection_1.default)('Canales').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(canales));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const canal = (yield connection_1.default('Canales').insert(values, '*'))[0];
+        const canal = (yield (0, connection_1.default)('Canales').insert(values, '*'))[0];
         res.status(200).json(canal);
     }
     catch (err) {
@@ -37,9 +37,9 @@ router.put('/:canal_id', helpers_1.default.ensureAuthenticated, helpers_1.defaul
     const canal_id = req.params.canal_id;
     const values = req.body;
     try {
-        const canal = yield connection_1.default('Canales').where({ CanalID: canal_id }).first();
+        const canal = yield (0, connection_1.default)('Canales').where({ CanalID: canal_id }).first();
         if (canal) {
-            const updatedCanal = (yield connection_1.default('Canales').where({ CanalID: canal_id }).update(values, '*'))[0];
+            const updatedCanal = (yield (0, connection_1.default)('Canales').where({ CanalID: canal_id }).update(values, '*'))[0];
             res.status(200).json(updatedCanal);
         }
         else {
@@ -53,7 +53,7 @@ router.put('/:canal_id', helpers_1.default.ensureAuthenticated, helpers_1.defaul
 router.delete('/:canal_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const canal_id = req.params.canal_id;
     try {
-        const deletedCanal = yield connection_1.default('Canales').where({ CanalID: canal_id }).delete();
+        const deletedCanal = yield (0, connection_1.default)('Canales').where({ CanalID: canal_id }).delete();
         if (deletedCanal) {
             res.status(200).json(`Canal ID: ${canal_id} eliminado satisfactoriamente`);
         }
@@ -67,8 +67,8 @@ router.delete('/:canal_id', helpers_1.default.ensureAuthenticated, helpers_1.def
 }));
 router.get('/subcanales', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const subcanales = yield connection_1.default('Subcanales').select('*');
-        res.status(200).json(utils_1.camelizeKeys(subcanales));
+        const subcanales = yield (0, connection_1.default)('Subcanales').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(subcanales));
     }
     catch (err) {
         next(err);

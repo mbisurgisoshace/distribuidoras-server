@@ -8,13 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = require("../db/connection");
 class AuditoriaService {
 }
 exports.default = AuditoriaService;
+_a = AuditoriaService;
 AuditoriaService.log = (tabla, id_tabla, object, accion, usuario) => __awaiter(void 0, void 0, void 0, function* () {
-    const log = yield connection_1.default('Auditoria').insert({ tabla, id_tabla, object, accion, usuario }, '*');
+    const log = yield (0, connection_1.default)('Auditoria').insert({ tabla, id_tabla, object, accion, usuario }, '*');
     return log;
 });
 //# sourceMappingURL=AuditoriaService.js.map

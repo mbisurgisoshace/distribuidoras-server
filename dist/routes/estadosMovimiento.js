@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const estadosMovimiento = yield connection_1.default('MovimientosEstado').select('*');
-        res.status(200).json(utils_1.camelizeKeys(estadosMovimiento));
+        const estadosMovimiento = yield (0, connection_1.default)('MovimientosEstado').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(estadosMovimiento));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const estadoMovimiento = (yield connection_1.default('MovimientosEstado').insert(values, '*'))[0];
+        const estadoMovimiento = (yield (0, connection_1.default)('MovimientosEstado').insert(values, '*'))[0];
         res.status(200).json(estadoMovimiento);
     }
     catch (err) {
@@ -37,11 +37,11 @@ router.put('/tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helpers
     const tipo_movimiento_id = req.params.tipo_movimiento_id;
     const values = req.body;
     try {
-        const estadoMovimiento = yield connection_1.default('MovimientosEstado')
+        const estadoMovimiento = yield (0, connection_1.default)('MovimientosEstado')
             .where({ EstadoMovimientoID: tipo_movimiento_id })
             .first();
         if (estadoMovimiento) {
-            const updatedEstadoMovimiento = (yield connection_1.default('MovimientosEstado')
+            const updatedEstadoMovimiento = (yield (0, connection_1.default)('MovimientosEstado')
                 .where({ EstadoMovimientoID: tipo_movimiento_id })
                 .update(values, '*'))[0];
             res.status(200).json(updatedEstadoMovimiento);
@@ -57,7 +57,7 @@ router.put('/tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helpers
 router.delete('/tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const tipo_movimiento_id = req.params.tipo_movimiento_id;
     try {
-        const deletedEstadoMovimiento = yield connection_1.default('MovimientosEstado')
+        const deletedEstadoMovimiento = yield (0, connection_1.default)('MovimientosEstado')
             .where({ EstadoMovimientoID: tipo_movimiento_id })
             .delete();
         if (deletedEstadoMovimiento) {

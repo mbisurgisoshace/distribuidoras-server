@@ -16,7 +16,7 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/columnasStock', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const columnasStock = yield connection_1.default('ColumnasStock').select('*');
+        const columnasStock = yield (0, connection_1.default)('ColumnasStock').select('*');
         res.status(200).json(columnasStock);
     }
     catch (err) {
@@ -26,7 +26,7 @@ router.get('/columnasStock', helpers_1.default.ensureAuthenticated, helpers_1.de
 router.post('/columnasStock', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const columnaStock = (yield connection_1.default('ColumnasStock').insert(values, '*'))[0];
+        const columnaStock = (yield (0, connection_1.default)('ColumnasStock').insert(values, '*'))[0];
         res.status(200).json(columnaStock);
     }
     catch (err) {
@@ -34,20 +34,20 @@ router.post('/columnasStock', helpers_1.default.ensureAuthenticated, helpers_1.d
     }
 }));
 router.post('/movimientos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const movimiento = (yield connection_1.default('MovimientosStockEnc').insert(values, '*'))[0];
-        res.status(200).json(utils_1.camelizeKeys(movimiento));
+        const movimiento = (yield (0, connection_1.default)('MovimientosStockEnc').insert(values, '*'))[0];
+        res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
     }
     catch (err) {
         next(err);
     }
 }));
 router.post('/movimientos/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const items = yield connection_1.default('MovimientosStockDet').insert(values, '*');
-        res.status(200).json(utils_1.camelizeKeys(items));
+        const items = yield (0, connection_1.default)('MovimientosStockDet').insert(values, '*');
+        res.status(200).json((0, utils_1.camelizeKeys)(items));
     }
     catch (err) {
         next(err);

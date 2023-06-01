@@ -26,7 +26,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 	}
 });
 
-router.put('/chofer_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.put('/chofer_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req: express.Request<any>, res, next) => {
 	const chofer_id = req.params.chofer_id;
 	const values = req.body;
 
@@ -44,7 +44,7 @@ router.put('/chofer_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUs
 	}
 });
 
-router.delete('/chofer_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.delete('/chofer_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req: express.Request<any>, res, next) => {
 	const chofer_id = req.params.chofer_id;
 
 	try {

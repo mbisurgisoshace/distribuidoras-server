@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const condicionesVenta = yield connection_1.default('CondicionesVenta').select('*');
-        res.status(200).json(utils_1.camelizeKeys(condicionesVenta));
+        const condicionesVenta = yield (0, connection_1.default)('CondicionesVenta').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(condicionesVenta));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const condicionVenta = (yield connection_1.default('CondicionesVenta').insert(values, '*'))[0];
+        const condicionVenta = (yield (0, connection_1.default)('CondicionesVenta').insert(values, '*'))[0];
         res.status(200).json(condicionVenta);
     }
     catch (err) {
@@ -37,11 +37,11 @@ router.put('/:condicion_venta_id', helpers_1.default.ensureAuthenticated, helper
     const condicion_venta_id = req.params.condicion_venta_id;
     const values = req.body;
     try {
-        const condicionVenta = yield connection_1.default('CondicionesVenta')
+        const condicionVenta = yield (0, connection_1.default)('CondicionesVenta')
             .where({ CondicionVentaID: condicion_venta_id })
             .first();
         if (condicionVenta) {
-            const updatedCondicionVenta = (yield connection_1.default('CondicionesVenta')
+            const updatedCondicionVenta = (yield (0, connection_1.default)('CondicionesVenta')
                 .where({ CondicionVentaID: condicion_venta_id })
                 .update(values, '*'))[0];
             res.status(200).json(updatedCondicionVenta);
@@ -57,7 +57,7 @@ router.put('/:condicion_venta_id', helpers_1.default.ensureAuthenticated, helper
 router.delete('/:condicion_venta_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const condicion_venta_id = req.params.condicion_venta_id;
     try {
-        const deletedCondicionVenta = yield connection_1.default('CondicionesVenta')
+        const deletedCondicionVenta = yield (0, connection_1.default)('CondicionesVenta')
             .where({ CondicionVentaID: condicion_venta_id })
             .delete();
         if (deletedCondicionVenta) {

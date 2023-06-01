@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let condicionesIva = yield connection_1.default('CondicionesIva').select('*');
-        res.status(200).json(utils_1.camelizeKeys(condicionesIva));
+        let condicionesIva = yield (0, connection_1.default)('CondicionesIva').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(condicionesIva));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const condicionIva = (yield connection_1.default('CondicionesIva').insert(values, '*'))[0];
+        const condicionIva = (yield (0, connection_1.default)('CondicionesIva').insert(values, '*'))[0];
         res.status(200).json(condicionIva);
     }
     catch (err) {
@@ -37,9 +37,9 @@ router.put('/:condicion_iva_id', helpers_1.default.ensureAuthenticated, helpers_
     const condicion_iva_id = req.params.condicion_iva_id;
     const values = req.body;
     try {
-        const condicionIva = yield connection_1.default('CondicionesIva').where({ CondicionIvaID: condicion_iva_id }).first();
+        const condicionIva = yield (0, connection_1.default)('CondicionesIva').where({ CondicionIvaID: condicion_iva_id }).first();
         if (condicionIva) {
-            const updatedCondicionIva = (yield connection_1.default('CondicionesIva')
+            const updatedCondicionIva = (yield (0, connection_1.default)('CondicionesIva')
                 .where({ CondicionIvaID: condicion_iva_id })
                 .update(values, '*'))[0];
             res.status(200).json(updatedCondicionIva);
@@ -55,7 +55,7 @@ router.put('/:condicion_iva_id', helpers_1.default.ensureAuthenticated, helpers_
 router.delete('/:condicion_iva_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const condicion_iva_id = req.params.condicion_iva_id;
     try {
-        const deletedCondicionIva = yield connection_1.default('CondicionesIva')
+        const deletedCondicionIva = yield (0, connection_1.default)('CondicionesIva')
             .where({ CondicionIvaID: condicion_iva_id })
             .delete();
         if (deletedCondicionIva) {

@@ -15,7 +15,7 @@ const helpers_1 = require("../auth/helpers");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tiposEnvase = yield connection_1.default('EnvasesTipo').select('*');
+        const tiposEnvase = yield (0, connection_1.default)('EnvasesTipo').select('*');
         res.status(200).json(tiposEnvase);
     }
     catch (err) {
@@ -25,7 +25,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const tipoEnvase = (yield connection_1.default('EnvasesTipo').insert(values, '*'))[0];
+        const tipoEnvase = (yield (0, connection_1.default)('EnvasesTipo').insert(values, '*'))[0];
         res.status(200).json(tipoEnvase);
     }
     catch (err) {
@@ -36,9 +36,9 @@ router.put('/:tipo_envase_id', helpers_1.default.ensureAuthenticated, helpers_1.
     const tipo_envase_id = req.params.tipo_envase_id;
     const values = req.body;
     try {
-        const tipoEnvase = yield connection_1.default('EnvasesTipo').where({ TipoEnvaseID: tipo_envase_id }).first();
+        const tipoEnvase = yield (0, connection_1.default)('EnvasesTipo').where({ TipoEnvaseID: tipo_envase_id }).first();
         if (tipoEnvase) {
-            const updatedTipoEnvase = (yield connection_1.default('EnvasesTipo')
+            const updatedTipoEnvase = (yield (0, connection_1.default)('EnvasesTipo')
                 .where({ TipoEnvaseID: tipo_envase_id })
                 .update(values, '*'))[0];
             res.status(200).json(updatedTipoEnvase);
@@ -54,7 +54,7 @@ router.put('/:tipo_envase_id', helpers_1.default.ensureAuthenticated, helpers_1.
 router.delete('/:tipo_envase_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const tipo_envase_id = req.params.tipo_envase_id;
     try {
-        const deletedTipoEnvase = yield connection_1.default('EnvasesTipo')
+        const deletedTipoEnvase = yield (0, connection_1.default)('EnvasesTipo')
             .where({ TipoEnvaseID: tipo_envase_id })
             .delete();
         if (deletedTipoEnvase) {

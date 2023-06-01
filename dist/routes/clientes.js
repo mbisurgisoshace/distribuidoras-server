@@ -19,8 +19,8 @@ const moment = require("moment");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const clientes = yield connection_1.default('Clientes').select('*').where({ Estado: true });
-        res.status(200).json(utils_1.camelizeKeys(clientes));
+        const clientes = yield (0, connection_1.default)('Clientes').select('*').where({ Estado: true });
+        res.status(200).json((0, utils_1.camelizeKeys)(clientes));
     }
     catch (err) {
         next(err);
@@ -37,22 +37,22 @@ router.get('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.e
             if (queryString.length > 3) {
                 const search = queryString.substring(3, queryString.length);
                 if (filter === 'a') {
-                    clientes = yield connection_1.default('Clientes').whereRaw('Altura like ?', [`%${search}%`]);
+                    clientes = yield (0, connection_1.default)('Clientes').whereRaw('Altura like ?', [`%${search}%`]);
                 }
                 if (filter === 'c') {
-                    clientes = yield connection_1.default('Clientes').whereRaw('Calle like ?', [`%${search}%`]);
+                    clientes = yield (0, connection_1.default)('Clientes').whereRaw('Calle like ?', [`%${search}%`]);
                 }
                 if (filter === 'r') {
-                    clientes = yield connection_1.default('Clientes').whereRaw('RazonSocial like ?', [`%${search}%`]);
+                    clientes = yield (0, connection_1.default)('Clientes').whereRaw('RazonSocial like ?', [`%${search}%`]);
                 }
                 if (filter === 't') {
-                    clientes = yield connection_1.default('Clientes').whereRaw('Telefono like ?', [`%${search}%`]);
+                    clientes = yield (0, connection_1.default)('Clientes').whereRaw('Telefono like ?', [`%${search}%`]);
                 }
             }
         }
         if (queryString[0] !== '-' && queryString[1]) {
             const search = queryString;
-            clientes = yield connection_1.default('Clientes')
+            clientes = yield (0, connection_1.default)('Clientes')
                 .whereRaw('Altura like ?', [`%${search}%`])
                 .orWhereRaw('Calle like ?', [`%${search}%`])
                 .orWhereRaw('RazonSocial like ?', [`%${search}%`])
@@ -61,7 +61,7 @@ router.get('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.e
                 .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
                 .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
         }
-        res.status(200).send(utils_1.camelizeKeys(clientes));
+        res.status(200).send((0, utils_1.camelizeKeys)(clientes));
     }
     catch (err) {
         next(err);
@@ -74,7 +74,7 @@ router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.
         let clientes = [];
         let clientesCount = 0;
         if (filterText) {
-            const query = connection_1.default('Clientes')
+            const query = (0, connection_1.default)('Clientes')
                 .select('ClienteID')
                 .whereRaw(`RazonSocial like '%${filterText}%'`)
                 .orWhereRaw(`ClienteID like '%${filterText}%'`)
@@ -86,7 +86,7 @@ router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.
         SELECT * FROM results
         WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
       `);
-            clientesCount = yield connection_1.default('Clientes')
+            clientesCount = yield (0, connection_1.default)('Clientes')
                 .count('ClienteID', { as: 'count' })
                 .whereIn('ClienteID', result);
         }
@@ -96,13 +96,13 @@ router.post('/filter', helpers_1.default.ensureAuthenticated, helpers_1.default.
         SELECT * FROM results
         WHERE RowNum BETWEEN ${offset + 1} AND ${offset + pageSize}
       `);
-            clientesCount = yield connection_1.default('Clientes').count('ClienteID', { as: 'count' });
+            clientesCount = yield (0, connection_1.default)('Clientes').count('ClienteID', { as: 'count' });
         }
         res.status(200).json({
             pageSize,
             currentPage,
             total: clientesCount[0][''],
-            clientes: utils_1.camelizeKeys(clientes),
+            clientes: (0, utils_1.camelizeKeys)(clientes),
         });
     }
     catch (err) {
@@ -119,7 +119,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         //   .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
         //   .leftOuterJoin('Zonas', 'Zonas.ZonaID', 'ZonasSub.ZonaID')
         //   .distinct('Clientes.ClienteID')
-        let query = connection_1.default('Clientes')
+        let query = (0, connection_1.default)('Clientes')
             .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
             .leftOuterJoin('MovimientosEnc', 'MovimientosEnc.ClienteID', 'Clientes.ClienteID')
             //.leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
@@ -170,14 +170,14 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
             .map((res) => res.MovimientoEncID)
             .filter((val) => val);
         console.log('innerResult', innerResult);
-        let query_comercial = connection_1.default('MovimientosEnc')
+        let query_comercial = (0, connection_1.default)('MovimientosEnc')
             .leftOuterJoin('MovimientosDet', 'MovimientosDet.MovimientoEncID', 'MovimientosEnc.MovimientoEncID')
             .leftOuterJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
             .whereIn('MovimientosEnc.MovimientoEncID', innerResult)
             .distinct('MovimientosEnc.ClienteID')
             .groupBy('MovimientosEnc.ClienteID');
         if (filters.tipo_producto) {
-            query_comercial = connection_1.default('viewTotalesPorTipoEnvase').whereIn('MovimientoEncID', innerResult);
+            query_comercial = (0, connection_1.default)('viewTotalesPorTipoEnvase').whereIn('MovimientoEncID', innerResult);
             if (filters.tipo_producto.butano &&
                 (filters.tipo_producto.butano.min || filters.tipo_producto.butano.max)) {
                 query_comercial = query_comercial.andWhere(function () {
@@ -229,20 +229,20 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
             .filter((val) => val);
         console.log('outerResult', outerResult);
         //const result = await knex('Clientes').whereIn('ClienteID', innerResult);
-        const result = yield connection_1.default('Clientes').whereIn('ClienteID', outerResult);
-        res.send(utils_1.camelizeKeys(result));
+        const result = yield (0, connection_1.default)('Clientes').whereIn('ClienteID', outerResult);
+        res.send((0, utils_1.camelizeKeys)(result));
         //res.send(camelizeKeys([]));
     }
     catch (err) {
         console.log('err', err);
-        res.send(utils_1.camelizeKeys([]));
+        res.send((0, utils_1.camelizeKeys)([]));
     }
 }));
 router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const cliente = yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).first();
-        res.status(200).json(utils_1.camelizeKeys(cliente));
+        const cliente = yield (0, connection_1.default)('Clientes').where({ ClienteID: cliente_id }).first();
+        res.status(200).json((0, utils_1.camelizeKeys)(cliente));
     }
     catch (err) {
         next(err);
@@ -251,8 +251,8 @@ router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_
 router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const canal_id = req.params.canal_id;
     try {
-        const clientes = yield connection_1.default('Clientes').where({ CanalID: canal_id });
-        res.status(200).json(utils_1.camelizeKeys(clientes));
+        const clientes = yield (0, connection_1.default)('Clientes').where({ CanalID: canal_id });
+        res.status(200).json((0, utils_1.camelizeKeys)(clientes));
     }
     catch (err) {
         next(err);
@@ -261,13 +261,13 @@ router.get('/canal/:canal_id(\\d+)', helpers_1.default.ensureAuthenticated, help
 router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { zonaId, diaSemana } = req.query;
     try {
-        const zonasSub = yield connection_1.default('ZonasSub').where({ ZonaID: zonaId }).select('*');
-        const clientes = yield connection_1.default('Plantillas')
+        const zonasSub = yield (0, connection_1.default)('ZonasSub').where({ ZonaID: zonaId }).select('*');
+        const clientes = yield (0, connection_1.default)('Plantillas')
             .innerJoin('Clientes', 'Clientes.ClienteID', 'Plantillas.ClienteID')
             .whereIn('Clientes.ZonaSubID', zonasSub.map((zs) => zs.SubZonaID))
             .andWhere('DiaSemana', diaSemana)
             .select('Clientes.*');
-        res.status(200).json(utils_1.camelizeKeys(clientes));
+        res.status(200).json((0, utils_1.camelizeKeys)(clientes));
     }
     catch (err) {
         next(err);
@@ -275,7 +275,7 @@ router.get('/plantilla', helpers_1.default.ensureAuthenticated, helpers_1.defaul
 }));
 router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const lastCodigo = (yield connection_1.default('Clientes').first().orderBy('ClienteID', 'desc').pluck('ClienteID'))[0] + 1;
+        const lastCodigo = (yield (0, connection_1.default)('Clientes').first().orderBy('ClienteID', 'desc').pluck('ClienteID'))[0] + 1;
         res.status(200).json(lastCodigo);
     }
     catch (err) {
@@ -285,7 +285,7 @@ router.get('/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ens
 router.get('/:cliente_id(\\d+)/lastPedidos', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const ultimosPedidos = yield connection_1.default('MovimientosEnc')
+        const ultimosPedidos = yield (0, connection_1.default)('MovimientosEnc')
             .limit(5)
             .sum('MovimientosDet.Monto as Total')
             .select('MovimientosEnc.MovimientoEncID', 'MovimientosEnc.Fecha', 'MovimientosTipo.TipoMovimientoNombre', 'CondicionesVenta.CondicionVentaNombre', 'MovimientosDet.Monto')
@@ -296,19 +296,19 @@ router.get('/:cliente_id(\\d+)/lastPedidos', helpers_1.default.ensureAuthenticat
             .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
             .where({ ClienteID: cliente_id, EstadoMovimientoID: 3 })
             .groupBy('MovimientosEnc.MovimientoEncID', 'MovimientosEnc.Fecha', 'MovimientosTipo.TipoMovimientoNombre', 'CondicionesVenta.CondicionVentaNombre', 'MovimientosDet.Monto');
-        res.status(200).json(utils_1.camelizeKeys(ultimosPedidos));
+        res.status(200).json((0, utils_1.camelizeKeys)(ultimosPedidos));
     }
     catch (err) {
         next(err);
     }
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body, 'cliente_id');
+    const values = (0, utils_1.formatKeys)(req.body, 'cliente_id');
     //values.estado = true;
     try {
-        const cliente = (yield connection_1.default('Clientes').insert(values, '*', { includeTriggerModifications: true }))[0];
+        const cliente = (yield (0, connection_1.default)('Clientes').insert(values, '*', { includeTriggerModifications: true }))[0];
         AuditoriaService_1.default.log('clientes', cliente.ClienteID, JSON.stringify(cliente), 'insert', req.user.username);
-        res.status(200).json(utils_1.camelizeKeys(cliente));
+        res.status(200).json((0, utils_1.camelizeKeys)(cliente));
     }
     catch (err) {
         console.log('err', err);
@@ -317,13 +317,13 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
 }));
 router.put('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
-    const values = utils_1.formatKeys(req.body, 'cliente_id');
+    const values = (0, utils_1.formatKeys)(req.body, 'cliente_id');
     try {
-        const cliente = yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).first();
+        const cliente = yield (0, connection_1.default)('Clientes').where({ ClienteID: cliente_id }).first();
         if (cliente) {
-            const updatedCliente = (yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).update(values, '*'))[0];
+            const updatedCliente = (yield (0, connection_1.default)('Clientes').where({ ClienteID: cliente_id }).update(values, '*'))[0];
             AuditoriaService_1.default.log('clientes', updatedCliente.ClienteID, JSON.stringify(updatedCliente), 'update', req.user.username);
-            res.status(200).json(utils_1.camelizeKeys(updatedCliente));
+            res.status(200).json((0, utils_1.camelizeKeys)(updatedCliente));
         }
         else {
             res.status(404).json({ error: `Cliente ID: ${cliente_id} no existe.` });
@@ -336,7 +336,7 @@ router.put('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_
 router.delete('/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const deletedCliente = yield connection_1.default('Clientes').where({ ClienteID: cliente_id }).delete();
+        const deletedCliente = yield (0, connection_1.default)('Clientes').where({ ClienteID: cliente_id }).delete();
         if (deletedCliente) {
             AuditoriaService_1.default.log('clientes', deletedCliente.ClienteID, JSON.stringify(deletedCliente), 'delete', req.user.username);
             res.status(200).json(`Cliente ID: ${cliente_id} eliminado satisfactoriamente`);
@@ -352,13 +352,13 @@ router.delete('/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.d
 router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const lastPedidoId = yield connection_1.default('MovimientosEnc')
+        const lastPedidoId = yield (0, connection_1.default)('MovimientosEnc')
             .where({ ClienteID: cliente_id })
             .orderBy('fecha', 'desc')
             .first()
             .pluck('MovimientoEncID');
         if (lastPedidoId[0]) {
-            let items = yield connection_1.default('MovimientosEnc')
+            let items = yield (0, connection_1.default)('MovimientosEnc')
                 .innerJoin('MovimientosDet', 'MovimientosEnc.MovimientoEncID', 'MovimientosDet.MovimientoEncID')
                 .innerJoin('Envases', 'MovimientosDet.EnvaseID', 'Envases.EnvaseID')
                 .where('MovimientosEnc.MovimientoEncID', lastPedidoId[0])
@@ -371,7 +371,7 @@ router.get('/:cliente_id/last', helpers_1.default.ensureAuthenticated, helpers_1
             }
             let lastPedido = {
                 pedido_id: lastPedidoId[0],
-                items: utils_1.camelizeKeys(items),
+                items: (0, utils_1.camelizeKeys)(items),
             };
             res.status(200).json(lastPedido);
         }
@@ -406,13 +406,13 @@ router.get('/:cliente_id/comodato', helpers_1.default.ensureAuthenticated, helpe
         // } else {
         //   res.status(404).json({error: 'El cliente no tiene comodatos.'});
         // }
-        const items = yield connection_1.default('ComodatosMovimientos')
+        const items = yield (0, connection_1.default)('ComodatosMovimientos')
             .select('Envases.EnvaseCodigo', 'Envases.EnvaseNombre')
             .sum('Cantidad as Cantidad')
             .innerJoin('Envases', 'ComodatosMovimientos.envase_id', 'Envases.EnvaseID')
             .where({ cliente_id })
             .groupBy('Envases.EnvaseCodigo', 'Envases.EnvaseNombre');
-        res.status(200).json(utils_1.camelizeKeys(items));
+        res.status(200).json((0, utils_1.camelizeKeys)(items));
     }
     catch (err) {
         next(err);

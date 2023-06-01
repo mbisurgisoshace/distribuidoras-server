@@ -8,17 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = require("../db/connection");
 class ComodatoService {
 }
 exports.default = ComodatoService;
+_a = ComodatoService;
 ComodatoService.insertarComodato = (comodatoEnc, comodatoDet) => __awaiter(void 0, void 0, void 0, function* () {
-    const comodato = (yield connection_1.default('ComodatosEnc').insert(comodatoEnc, '*'))[0];
+    const comodato = (yield (0, connection_1.default)('ComodatosEnc').insert(comodatoEnc, '*'))[0];
     comodatoDet.forEach(d => {
         d.ComodatoEncID = comodato.ComodatoEncID;
     });
-    comodato.items = yield connection_1.default('ComodatosDet').insert(comodatoDet, '*');
+    comodato.items = yield (0, connection_1.default)('ComodatosDet').insert(comodatoDet, '*');
     return comodato;
 });
 // public static insertarMovimientos = async (enc, items, itemsRenovado) => {
@@ -100,6 +102,6 @@ ComodatoService.insertarMovimientos = (enc, items) => __awaiter(void 0, void 0, 
             nro_comprobante: enc.nro_comprobante
         });
     });
-    yield connection_1.default('ComodatosMovimientos').insert(movimientos, '*');
+    yield (0, connection_1.default)('ComodatosMovimientos').insert(movimientos, '*');
 });
 //# sourceMappingURL=ComodatoService.js.map

@@ -19,15 +19,15 @@ const router = express.Router();
 router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
-        const movimientos = yield connection_1.default('MovimientosEnc').where({ HojaRutaID: hoja_id });
+        const movimientos = yield (0, connection_1.default)('MovimientosEnc').where({ HojaRutaID: hoja_id });
         yield Promise.all(movimientos.map((m) => __awaiter(void 0, void 0, void 0, function* () {
-            const detalle = yield connection_1.default('MovimientosDet').where({
+            const detalle = yield (0, connection_1.default)('MovimientosDet').where({
                 MovimientoEncID: m.MovimientoEncID,
             });
-            utils_1.camelizeKeys(detalle);
-            m.items = utils_1.camelizeKeys(detalle);
+            (0, utils_1.camelizeKeys)(detalle);
+            m.items = (0, utils_1.camelizeKeys)(detalle);
         })));
-        res.status(200).json(utils_1.camelizeKeys(movimientos));
+        res.status(200).json((0, utils_1.camelizeKeys)(movimientos));
     }
     catch (err) {
         next(err);
@@ -36,16 +36,16 @@ router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default
 router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const movimiento_enc_id = req.params.movimiento_enc_id;
     try {
-        const movimiento = yield connection_1.default('MovimientosEnc')
+        const movimiento = yield (0, connection_1.default)('MovimientosEnc')
             .where({ MovimientoEncID: movimiento_enc_id })
             .first();
         console.log('movimiento_enc_id', movimiento_enc_id);
         console.log('movimiento', movimiento);
-        const items = yield connection_1.default('MovimientosDet').where({
+        const items = yield (0, connection_1.default)('MovimientosDet').where({
             MovimientoEncID: movimiento.MovimientoEncID,
         });
-        movimiento.items = utils_1.camelizeKeys(items);
-        res.status(200).json(utils_1.camelizeKeys(movimiento));
+        movimiento.items = (0, utils_1.camelizeKeys)(items);
+        res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
     }
     catch (err) {
         console.log('err', err);
@@ -55,11 +55,11 @@ router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
 router.get('/movimiento/:movimiento_enc_id/detalle', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const movimiento_enc_id = req.params.movimiento_enc_id;
     try {
-        const detalle = yield connection_1.default('MovimientosDet')
+        const detalle = yield (0, connection_1.default)('MovimientosDet')
             .select('MovimientosDet.*', 'Envases.EnvaseNombre')
             .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
             .where({ MovimientoEncID: movimiento_enc_id });
-        res.status(200).json(utils_1.camelizeKeys(detalle));
+        res.status(200).json((0, utils_1.camelizeKeys)(detalle));
     }
     catch (err) {
         console.log('err', err);
@@ -69,7 +69,7 @@ router.get('/movimiento/:movimiento_enc_id/detalle', helpers_1.default.ensureAut
 router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const filters = req.body;
     try {
-        let query = connection_1.default('MovimientosEnc')
+        let query = (0, connection_1.default)('MovimientosEnc')
             .leftOuterJoin('HojasRuta', 'HojasRuta.HojaRutaID', 'MovimientosEnc.HojaRutaID')
             //.leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
             .leftOuterJoin('Clientes', 'Clientes.ClienteID', 'MovimientosEnc.ClienteID')
@@ -121,7 +121,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         let innerResult = ((yield query) || [])
             .map((res) => res.MovimientoEncID)
             .filter((val) => val);
-        const result = yield connection_1.default('viewMonitor')
+        const result = yield (0, connection_1.default)('viewMonitor')
             .whereIn('MovimientoEncID', innerResult)
             .timeout(30000);
         res.send(result);
@@ -131,7 +131,7 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
     }
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
         //const movimiento = (await knex('MovimientosEnc').insert(values, '*'))[0];
         const newPedidoId = yield PedidoService_1.default.insertarPedido(values);
@@ -146,10 +146,10 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
     }
 }));
 router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const items = yield connection_1.default('MovimientosDet').insert(values, '*');
-        res.status(200).json(utils_1.camelizeKeys(items));
+        const items = yield (0, connection_1.default)('MovimientosDet').insert(values, '*');
+        res.status(200).json((0, utils_1.camelizeKeys)(items));
     }
     catch (err) {
         console.log('err', err);
@@ -159,11 +159,11 @@ router.post('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helper
 router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     const ids = values.ids;
-    const actualizaciones = utils_1.formatKeys(values.actualizaciones);
+    const actualizaciones = (0, utils_1.formatKeys)(values.actualizaciones);
     console.log('ids', ids);
     console.log('actualizaciones', actualizaciones);
     try {
-        yield connection_1.default('MovimientosEnc').update(actualizaciones, '*').whereIn('MovimientoEncID', ids);
+        yield (0, connection_1.default)('MovimientosEnc').update(actualizaciones, '*').whereIn('MovimientoEncID', ids);
         res.status(200).json('ok');
     }
     catch (err) {
@@ -174,21 +174,21 @@ router.put('/actualizacion_masiva', helpers_1.default.ensureAuthenticated, helpe
 router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, 
 //shouldAllowUpdate,
 (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
         for (let i = 0; i < values.length; i++) {
             const v = values[i];
             if (v.movimientodetid) {
                 const id = v.movimientodetid;
-                const updateRow = utils_1.formatKeys(v, 'movimientodetid');
-                yield connection_1.default('MovimientosDet').where({ MovimientoDetID: id }).update(updateRow, '*');
+                const updateRow = (0, utils_1.formatKeys)(v, 'movimientodetid');
+                yield (0, connection_1.default)('MovimientosDet').where({ MovimientoDetID: id }).update(updateRow, '*');
             }
             else {
-                yield connection_1.default('MovimientosDet').insert(v, '*');
+                yield (0, connection_1.default)('MovimientosDet').insert(v, '*');
             }
         }
         const items = [];
-        res.status(200).json(utils_1.camelizeKeys(items));
+        res.status(200).json((0, utils_1.camelizeKeys)(items));
     }
     catch (err) {
         console.log('err', err);
@@ -197,12 +197,12 @@ router.put('/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers
 }));
 router.put('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const movimiento_enc_id = req.params.movimiento_enc_id;
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const movimiento = (yield connection_1.default('MovimientosEnc')
+        const movimiento = (yield (0, connection_1.default)('MovimientosEnc')
             .where({ MovimientoEncID: movimiento_enc_id })
             .update(values, '*'))[0];
-        res.status(200).json(utils_1.camelizeKeys(movimiento));
+        res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
     }
     catch (err) {
         console.log('err', err);

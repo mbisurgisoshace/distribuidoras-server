@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const zonas = yield connection_1.default('Zonas').select('*');
-        res.status(200).json(utils_1.camelizeKeys(zonas));
+        const zonas = yield (0, connection_1.default)('Zonas').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(zonas));
     }
     catch (err) {
         console.log('err', err);
@@ -27,7 +27,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.get('/:zona_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const zona_id = req.params.zona_id;
     try {
-        const zona = yield connection_1.default('Zonas').where({ ZonaID: zona_id }).first();
+        const zona = yield (0, connection_1.default)('Zonas').where({ ZonaID: zona_id }).first();
         res.status(200).json(zona);
     }
     catch (err) {
@@ -37,7 +37,7 @@ router.get('/:zona_id', helpers_1.default.ensureAuthenticated, helpers_1.default
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const zona = (yield connection_1.default('Zonas').insert(values, '*'))[0];
+        const zona = (yield (0, connection_1.default)('Zonas').insert(values, '*'))[0];
         res.status(200).json(zona);
     }
     catch (err) {
@@ -48,9 +48,9 @@ router.put('/:zona_id', helpers_1.default.ensureAuthenticated, helpers_1.default
     const zona_id = req.params.zona_id;
     const values = req.body;
     try {
-        const zona = yield connection_1.default('Zonas').where({ ZonaID: zona_id }).first();
+        const zona = yield (0, connection_1.default)('Zonas').where({ ZonaID: zona_id }).first();
         if (zona) {
-            const updatedZona = (yield connection_1.default('Zonas').where({ ZonaID: zona_id }).update(values, '*'))[0];
+            const updatedZona = (yield (0, connection_1.default)('Zonas').where({ ZonaID: zona_id }).update(values, '*'))[0];
             res.status(200).json(updatedZona);
         }
         else {
@@ -65,7 +65,7 @@ router.put('/:zona_id', helpers_1.default.ensureAuthenticated, helpers_1.default
 router.delete('/:zona_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const zona_id = req.params.zona_id;
     try {
-        const deletedZona = yield connection_1.default('Zonas').where({ ZonaID: zona_id }).delete();
+        const deletedZona = yield (0, connection_1.default)('Zonas').where({ ZonaID: zona_id }).delete();
         if (deletedZona) {
             res.status(200).json(`Zona ID: ${zona_id} eliminado satisfactoriamente`);
         }

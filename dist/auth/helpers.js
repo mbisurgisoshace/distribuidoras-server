@@ -24,10 +24,10 @@ class AuthHelpers {
             const email = req.body.email;
             const username = req.body.username;
             try {
-                let user = yield connection_1.default('Users').where({ username: req.body.username }).first();
+                let user = yield (0, connection_1.default)('Users').where({ username: req.body.username }).first();
                 if (user)
                     return Promise.reject({ status: 403, message: 'El usuario ya existe' });
-                user = yield connection_1.default('Users').insert({ email, username, password: hash }, '*');
+                user = yield (0, connection_1.default)('Users').insert({ email, username, password: hash }, '*');
                 return user;
             }
             catch (err) {
@@ -41,10 +41,10 @@ class AuthHelpers {
             const hash = bcrypt.hashSync(req.body.password, salt);
             const username = req.body.username;
             try {
-                let user = yield connection_1.default('Users').where({ username: req.body.username }).first();
+                let user = yield (0, connection_1.default)('Users').where({ username: req.body.username }).first();
                 if (!user)
                     return Promise.reject({ status: 404, message: 'El usuario no existe' });
-                user = yield connection_1.default('Users').update({ password: hash }).where({ username });
+                user = yield (0, connection_1.default)('Users').update({ password: hash }).where({ username });
                 return user;
             }
             catch (err) {
@@ -93,7 +93,7 @@ class AuthHelpers {
             }
             else {
                 try {
-                    const user = yield connection_1.default('Users').where({ id: parseInt(payload.sub) }).first();
+                    const user = yield (0, connection_1.default)('Users').where({ id: parseInt(payload.sub) }).first();
                     if (!user) {
                         res.status(401).json({
                             status: 'El usuario no existe',

@@ -17,13 +17,13 @@ const router = express.Router();
 router.get('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
-        const cargas = yield connection_1.default('CargasEnc').where({ HojaRutaID: hoja_id });
+        const cargas = yield (0, connection_1.default)('CargasEnc').where({ HojaRutaID: hoja_id });
         yield Promise.all(cargas.map((c) => __awaiter(void 0, void 0, void 0, function* () {
-            const detalle = yield connection_1.default('CargasDet').where({ CargaEncID: c.CargaEncID });
-            utils_1.camelizeKeys(detalle);
-            c.items = utils_1.camelizeKeys(detalle);
+            const detalle = yield (0, connection_1.default)('CargasDet').where({ CargaEncID: c.CargaEncID });
+            (0, utils_1.camelizeKeys)(detalle);
+            c.items = (0, utils_1.camelizeKeys)(detalle);
         })));
-        res.status(200).json(utils_1.camelizeKeys(cargas));
+        res.status(200).json((0, utils_1.camelizeKeys)(cargas));
     }
     catch (err) {
         next(err);
@@ -33,13 +33,13 @@ router.get('/:hoja_id/:tipo_carga_id', helpers_1.default.ensureAuthenticated, he
     const hoja_id = req.params.hoja_id;
     const tipo_carga_id = req.params.tipo_carga_id;
     try {
-        const carga = yield connection_1.default('CargasEnc')
+        const carga = yield (0, connection_1.default)('CargasEnc')
             .where({ HojaRutaID: hoja_id, CargaTipoID: tipo_carga_id })
             .first();
         if (carga) {
-            const detalle = yield connection_1.default('CargasDet').where({ CargaEncID: carga.CargaEncID });
-            const items = utils_1.camelizeKeys(detalle);
-            return res.status(200).json(utils_1.camelizeKeys(Object.assign(Object.assign({}, carga), { items })));
+            const detalle = yield (0, connection_1.default)('CargasDet').where({ CargaEncID: carga.CargaEncID });
+            const items = (0, utils_1.camelizeKeys)(detalle);
+            return res.status(200).json((0, utils_1.camelizeKeys)(Object.assign(Object.assign({}, carga), { items })));
         }
         res.status(200).json(null);
     }
@@ -49,8 +49,8 @@ router.get('/:hoja_id/:tipo_carga_id', helpers_1.default.ensureAuthenticated, he
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const cargaEnc = utils_1.formatKeys(req.body, 'items');
-        const cargaDet = utils_1.formatKeys(req.body.items);
+        const cargaEnc = (0, utils_1.formatKeys)(req.body, 'items');
+        const cargaDet = (0, utils_1.formatKeys)(req.body.items);
         let newCarga;
         const items = [];
         yield connection_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -61,10 +61,10 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
                 detalle.cargaEncId = newCarga.CargaEncID;
                 console.log(detalle);
                 const newDetalle = yield trx('CargasDet').insert(detalle, '*');
-                items.push(utils_1.camelizeKeys(newDetalle));
+                items.push((0, utils_1.camelizeKeys)(newDetalle));
             }
         }));
-        res.status(200).json(utils_1.camelizeKeys(Object.assign(Object.assign({}, newCarga), { items })));
+        res.status(200).json((0, utils_1.camelizeKeys)(Object.assign(Object.assign({}, newCarga), { items })));
     }
     catch (err) {
         next(err);
@@ -73,8 +73,8 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
 router.put('/:carga_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const carga_enc_id = req.params.carga_enc_id;
     try {
-        const cargaEnc = utils_1.formatKeys(req.body, 'items');
-        const cargaDet = utils_1.formatKeys(req.body.items);
+        const cargaEnc = (0, utils_1.formatKeys)(req.body, 'items');
+        const cargaDet = (0, utils_1.formatKeys)(req.body.items);
         const items = [];
         console.log(cargaEnc);
         console.log(cargaDet);
@@ -87,10 +87,10 @@ router.put('/:carga_enc_id', helpers_1.default.ensureAuthenticated, helpers_1.de
                 console.log(detalle);
                 detalle.cargaEncId = carga_enc_id;
                 const updateDetalle = yield trx('CargasDet').insert(detalle, '*');
-                items.push(utils_1.camelizeKeys(updateDetalle));
+                items.push((0, utils_1.camelizeKeys)(updateDetalle));
             }
         }));
-        res.status(200).json(utils_1.camelizeKeys(Object.assign(Object.assign({}, cargaEnc), { items })));
+        res.status(200).json((0, utils_1.camelizeKeys)(Object.assign(Object.assign({}, cargaEnc), { items })));
     }
     catch (err) {
         next(err);

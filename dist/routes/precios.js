@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const listasPrecio = yield connection_1.default('ListasPrecio').select('*');
-        res.status(200).json(utils_1.camelizeKeys(listasPrecio));
+        const listasPrecio = yield (0, connection_1.default)('ListasPrecio').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(listasPrecio));
     }
     catch (err) {
         next(err);
@@ -26,19 +26,19 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.get('/:precio_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const precio_id = req.params.precio_id;
     try {
-        const precios = yield connection_1.default('ListasPrecioDet').select('*').where({ ListaPrecioID: precio_id });
-        res.status(200).json(utils_1.camelizeKeys(precios));
+        const precios = yield (0, connection_1.default)('ListasPrecioDet').select('*').where({ ListaPrecioID: precio_id });
+        res.status(200).json((0, utils_1.camelizeKeys)(precios));
     }
     catch (err) {
         next(err);
     }
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
         yield connection_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
             const precioEnc = (yield trx('ListasPrecio').insert({ ListaPrecioNombre: values.listaprecionombre }, '*'))[0];
-            const items = values.items.map(item => (Object.assign(Object.assign({}, utils_1.formatKeys(item)), { ListaPrecioID: precioEnc.ListaPrecioID })));
+            const items = values.items.map(item => (Object.assign(Object.assign({}, (0, utils_1.formatKeys)(item)), { ListaPrecioID: precioEnc.ListaPrecioID })));
             yield trx('ListasPrecioDet').insert(items, '*');
         }));
         res.status(200).json('Ok');
@@ -48,7 +48,7 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
     }
 }));
 router.put('/:precio_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     const precio_id = req.params.precio_id;
     try {
         yield connection_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
@@ -56,8 +56,8 @@ router.put('/:precio_id', helpers_1.default.ensureAuthenticated, helpers_1.defau
                 const v = values.items[i];
                 if (v.lista_precio_det_id) {
                     const id = v.lista_precio_det_id;
-                    const updateRow = utils_1.formatKeys(v, 'lista_precio_det_id');
-                    yield connection_1.default('ListasPrecioDet').where({ ListaPrecioDetID: id }).update(updateRow, '*');
+                    const updateRow = (0, utils_1.formatKeys)(v, 'lista_precio_det_id');
+                    yield (0, connection_1.default)('ListasPrecioDet').where({ ListaPrecioDetID: id }).update(updateRow, '*');
                 }
             }
         }));

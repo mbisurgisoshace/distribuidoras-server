@@ -16,17 +16,17 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const feriados = yield connection_1.default('Feriados').select('*');
-        res.status(200).json(utils_1.camelizeKeys(feriados));
+        const feriados = yield (0, connection_1.default)('Feriados').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(feriados));
     }
     catch (err) {
         next(err);
     }
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const values = utils_1.formatKeys(req.body);
+    const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const feriado = (yield connection_1.default('Feriados').insert(values, '*'))[0];
+        const feriado = (yield (0, connection_1.default)('Feriados').insert(values, '*'))[0];
         res.status(200).json(feriado);
     }
     catch (err) {
@@ -35,11 +35,11 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
 }));
 router.put('/:feriado_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const feriado_id = req.params.feriado_id;
-    const values = utils_1.formatKeys(req.body, 'feriado_id');
+    const values = (0, utils_1.formatKeys)(req.body, 'feriado_id');
     try {
-        const feriado = yield connection_1.default('Feriados').where({ FeriadoID: feriado_id }).first();
+        const feriado = yield (0, connection_1.default)('Feriados').where({ FeriadoID: feriado_id }).first();
         if (feriado) {
-            const updatedFeriado = (yield connection_1.default('Feriados').where({ FeriadoID: feriado_id }).update(values, '*'))[0];
+            const updatedFeriado = (yield (0, connection_1.default)('Feriados').where({ FeriadoID: feriado_id }).update(values, '*'))[0];
             res.status(200).json(updatedFeriado);
         }
         else {
@@ -53,7 +53,7 @@ router.put('/:feriado_id', helpers_1.default.ensureAuthenticated, helpers_1.defa
 router.delete('/:feriado_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const feriado_id = req.params.feriado_id;
     try {
-        const deletedFeriado = yield connection_1.default('Feriados').where({ FeriadoID: feriado_id }).delete();
+        const deletedFeriado = yield (0, connection_1.default)('Feriados').where({ FeriadoID: feriado_id }).delete();
         if (deletedFeriado) {
             res.status(200).json(`Feriado ID: ${feriado_id} eliminado satisfactoriamente`);
         }

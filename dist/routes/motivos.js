@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const motivos = yield connection_1.default('Motivos').select('*');
-        res.status(200).json(utils_1.camelizeKeys(motivos));
+        const motivos = yield (0, connection_1.default)('Motivos').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(motivos));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const motivo = (yield connection_1.default('Motivos').insert(values, '*'))[0];
+        const motivo = (yield (0, connection_1.default)('Motivos').insert(values, '*'))[0];
         res.status(200).json(motivo);
     }
     catch (err) {
@@ -37,9 +37,9 @@ router.put('/:motivo_id', helpers_1.default.ensureAuthenticated, helpers_1.defau
     const motivo_id = req.params.motivo_id;
     const values = req.body;
     try {
-        const motivo = yield connection_1.default('Motivos').where({ MotivoID: motivo_id }).first();
+        const motivo = yield (0, connection_1.default)('Motivos').where({ MotivoID: motivo_id }).first();
         if (motivo) {
-            const updatedMotivo = (yield connection_1.default('Motivos').where({ MotivoID: motivo_id }).update(values, '*'))[0];
+            const updatedMotivo = (yield (0, connection_1.default)('Motivos').where({ MotivoID: motivo_id }).update(values, '*'))[0];
             res.status(200).json(updatedMotivo);
         }
         else {
@@ -53,7 +53,7 @@ router.put('/:motivo_id', helpers_1.default.ensureAuthenticated, helpers_1.defau
 router.delete('/:motivo_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const motivo_id = req.params.motivo_id;
     try {
-        const deletedMotivo = yield connection_1.default('Motivos').where({ MotivoID: motivo_id }).delete();
+        const deletedMotivo = yield (0, connection_1.default)('Motivos').where({ MotivoID: motivo_id }).delete();
         if (deletedMotivo) {
             res.status(200).json(`Motivo ID: ${motivo_id} eliminado satisfactoriamente`);
         }

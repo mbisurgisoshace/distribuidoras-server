@@ -20,7 +20,7 @@ let opts = {
 };
 passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield connection_1.default('Users').where({ username: jwt_payload.username }).first();
+        const user = yield (0, connection_1.default)('Users').where({ username: jwt_payload.username }).first();
         if (!user)
             return done(null, false, 'El usuario no existe');
         if (!helpers_1.default.comparePass(jwt_payload.password, user.password)) {
@@ -36,7 +36,7 @@ passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(
 })));
 passport.use(new passport_local_1.Strategy(opts, (username, password, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield connection_1.default('Users').where({ username }).first();
+        const user = yield (0, connection_1.default)('Users').where({ username }).first();
         if (!user)
             return done(null, false, 'El usuario no existe');
         if (!helpers_1.default.comparePass(password, user.password)) {
@@ -56,7 +56,7 @@ passport.serializeUser((user, done) => {
 });
 passport.deserializeUser((id, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield connection_1.default('Users').where({ id }).first();
+        const user = yield (0, connection_1.default)('Users').where({ id }).first();
         done(null, user);
     }
     catch (err) {

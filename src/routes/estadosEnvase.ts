@@ -25,7 +25,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 	}
 });
 
-router.put('/estado_envase_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.put('/estado_envase_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req:express.Request<any>, res, next) => {
 	const estado_envase_id = req.params.estado_envase_id;
 	const values = req.body;
 
@@ -51,7 +51,7 @@ router.delete(
 	'/estado_envase_id',
 	authHelpers.ensureAuthenticated,
 	authHelpers.ensureIsUser,
-	async (req, res, next) => {
+	async (req:express.Request<any>, res, next) => {
 		const estado_envase_id = req.params.estado_envase_id;
 
 		try {

@@ -26,7 +26,7 @@ router.post('/', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, asyn
 	}
 });
 
-router.put('/tipo_movimiento_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req, res, next) => {
+router.put('/tipo_movimiento_id', authHelpers.ensureAuthenticated, authHelpers.ensureIsUser, async (req:express.Request<any>, res, next) => {
 	const tipo_movimiento_id = req.params.tipo_movimiento_id;
 	const values = req.body;
 
@@ -52,7 +52,7 @@ router.delete(
 	'/tipo_movimiento_id',
 	authHelpers.ensureAuthenticated,
 	authHelpers.ensureIsUser,
-	async (req, res, next) => {
+	async (req:express.Request<any>, res, next) => {
 		const tipo_movimiento_id = req.params.tipo_movimiento_id;
 
 		try {

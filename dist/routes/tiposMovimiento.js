@@ -16,8 +16,8 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const tiposMovimiento = yield connection_1.default('MovimientosTipo').select('*');
-        res.status(200).json(utils_1.camelizeKeys(tiposMovimiento));
+        const tiposMovimiento = yield (0, connection_1.default)('MovimientosTipo').select('*');
+        res.status(200).json((0, utils_1.camelizeKeys)(tiposMovimiento));
     }
     catch (err) {
         next(err);
@@ -26,7 +26,7 @@ router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureI
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = req.body;
     try {
-        const tipoMovimiento = (yield connection_1.default('MovimientosTipo').insert(values, '*'))[0];
+        const tipoMovimiento = (yield (0, connection_1.default)('MovimientosTipo').insert(values, '*'))[0];
         res.status(200).json(tipoMovimiento);
     }
     catch (err) {
@@ -37,9 +37,9 @@ router.put('/:tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helper
     const tipo_movimiento_id = req.params.tipo_movimiento_id;
     const values = req.body;
     try {
-        const tipoMovimiento = yield connection_1.default('MovimientosTipo').where({ TipoMovimientoID: tipo_movimiento_id }).first();
+        const tipoMovimiento = yield (0, connection_1.default)('MovimientosTipo').where({ TipoMovimientoID: tipo_movimiento_id }).first();
         if (tipoMovimiento) {
-            const updatedTipoMovimiento = (yield connection_1.default('MovimientosTipo')
+            const updatedTipoMovimiento = (yield (0, connection_1.default)('MovimientosTipo')
                 .where({ TipoMovimientoID: tipo_movimiento_id })
                 .update(values, '*'))[0];
             res.status(200).json(updatedTipoMovimiento);
@@ -55,7 +55,7 @@ router.put('/:tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helper
 router.delete('/:tipo_movimiento_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const tipo_movimiento_id = req.params.tipo_movimiento_id;
     try {
-        const deletedTipoMovimiento = yield connection_1.default('MovimientosTipo')
+        const deletedTipoMovimiento = yield (0, connection_1.default)('MovimientosTipo')
             .where({ TipoMovimientoID: tipo_movimiento_id })
             .delete();
         if (deletedTipoMovimiento) {
