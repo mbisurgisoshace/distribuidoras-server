@@ -308,7 +308,16 @@ router.get(
     const cliente_id = req.params.cliente_id;
 
     try {
-      const cliente = await knex('Clientes').where({ ClienteID: cliente_id }).first();
+      //const cliente = await knex('Clientes').where({ ClienteID: cliente_id }).first();
+      const cliente = await knex('Clientes')
+        .select([
+          'Clientes.*',
+          'Canales.CanalNombre',
+          'ZonasSub.SubZonaNombre'
+        ])
+        .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+        .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
+        .where({ ClienteID: cliente_id }).first();
       res.status(200).json(camelizeKeys(cliente));
     } catch (err) {
       next(err);

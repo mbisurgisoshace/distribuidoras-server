@@ -241,7 +241,16 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
 router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const cliente = yield (0, connection_1.default)('Clientes').where({ ClienteID: cliente_id }).first();
+        //const cliente = await knex('Clientes').where({ ClienteID: cliente_id }).first();
+        const cliente = yield (0, connection_1.default)('Clientes')
+            .select([
+            'Clientes.*',
+            'Canales.CanalNombre',
+            'ZonasSub.SubZonaNombre'
+        ])
+            .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+            .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
+            .where({ ClienteID: cliente_id }).first();
         res.status(200).json((0, utils_1.camelizeKeys)(cliente));
     }
     catch (err) {

@@ -39,12 +39,12 @@ router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
         const movimiento = yield (0, connection_1.default)('MovimientosEnc')
             .where({ MovimientoEncID: movimiento_enc_id })
             .first();
-        console.log('movimiento_enc_id', movimiento_enc_id);
-        console.log('movimiento', movimiento);
+        movimiento.fecha = moment(movimiento.fecha).format('DD-MM-YYYY');
         const items = yield (0, connection_1.default)('MovimientosDet').where({
             MovimientoEncID: movimiento.MovimientoEncID,
         });
         movimiento.items = (0, utils_1.camelizeKeys)(items);
+        movimiento.items = movimiento.items.map(item => (Object.assign(Object.assign({}, item), { precio: item.monto / item.cantidad })));
         res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
     }
     catch (err) {
@@ -199,10 +199,13 @@ router.put('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
     const movimiento_enc_id = req.params.movimiento_enc_id;
     const values = (0, utils_1.formatKeys)(req.body);
     try {
-        const movimiento = (yield (0, connection_1.default)('MovimientosEnc')
-            .where({ MovimientoEncID: movimiento_enc_id })
-            .update(values, '*'))[0];
-        res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
+        // const movimiento = (
+        //   await knex('MovimientosEnc')
+        //     .where({ MovimientoEncID: movimiento_enc_id })
+        //     .update(values, '*')
+        // )[0];
+        yield PedidoService_1.default.updatePedido(movimiento_enc_id, values);
+        res.status(200).json('Ok');
     }
     catch (err) {
         console.log('err', err);

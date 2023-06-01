@@ -45,12 +45,15 @@ router.get(
       const movimiento = await knex('MovimientosEnc')
         .where({ MovimientoEncID: movimiento_enc_id })
         .first();
-      console.log('movimiento_enc_id', movimiento_enc_id);
-      console.log('movimiento', movimiento);
+      movimiento.fecha = moment(movimiento.fecha).format('DD-MM-YYYY')
       const items = await knex('MovimientosDet').where({
         MovimientoEncID: movimiento.MovimientoEncID,
       });
       movimiento.items = camelizeKeys(items);
+      movimiento.items = movimiento.items.map(item => ({
+        ...item,
+        precio: item.monto / item.cantidad
+      }))
       res.status(200).json(camelizeKeys(movimiento));
     } catch (err) {
       console.log('err', err);
@@ -264,12 +267,13 @@ router.put(
     const values: any = formatKeys(req.body);
 
     try {
-      const movimiento = (
-        await knex('MovimientosEnc')
-          .where({ MovimientoEncID: movimiento_enc_id })
-          .update(values, '*')
-      )[0];
-      res.status(200).json(camelizeKeys(movimiento));
+      // const movimiento = (
+      //   await knex('MovimientosEnc')
+      //     .where({ MovimientoEncID: movimiento_enc_id })
+      //     .update(values, '*')
+      // )[0];
+      await PedidoService.updatePedido(movimiento_enc_id, values);
+      res.status(200).json('Ok');
     } catch (err) {
       console.log('err', err);
       next(err);
