@@ -24,6 +24,7 @@ export default class PedidoService {
 
   public static updatePedido = async (pedidoId, pedido) => {
     const pedidoEnc = omit(['movimientoencid', 'items', 'createdat'], pedido);
+    pedidoEnc.fecha = moment(pedidoEnc.fecha, 'DD-MM-YYYY').format('YYYY-MM-DD')
     const pedidoDet = pedido.items.map(item => formatKeys(omit(['movimiento_det_id', 'precio'], item)));
     console.log(pedidoDet);
     pedidoDet.forEach(item => {
