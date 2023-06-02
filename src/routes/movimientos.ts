@@ -45,7 +45,7 @@ router.get(
       const movimiento = await knex('MovimientosEnc')
         .where({ MovimientoEncID: movimiento_enc_id })
         .first();
-      movimiento.fecha = moment(movimiento.fecha).format('DD-MM-YYYY')
+      movimiento.fecha = moment(movimiento.Fecha).utc().format('DD-MM-YYYY')
       const items = await knex('MovimientosDet').where({
         MovimientoEncID: movimiento.MovimientoEncID,
       });

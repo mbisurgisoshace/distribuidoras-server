@@ -39,7 +39,7 @@ router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
         const movimiento = yield (0, connection_1.default)('MovimientosEnc')
             .where({ MovimientoEncID: movimiento_enc_id })
             .first();
-        movimiento.fecha = moment(movimiento.fecha).format('DD-MM-YYYY');
+        movimiento.fecha = moment(movimiento.Fecha).utc().format('DD-MM-YYYY');
         const items = yield (0, connection_1.default)('MovimientosDet').where({
             MovimientoEncID: movimiento.MovimientoEncID,
         });
