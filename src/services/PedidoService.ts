@@ -38,6 +38,7 @@ export default class PedidoService {
     pedidoDet.forEach((item) => {
       item.movimientoencid = pedidoId;
     });
+    console.log('pedidoEnc', pedidoEnc);
 
     await knex.transaction(async (trx) => {
       await trx('MovimientosEnc').where({ MovimientoEncID: pedidoId }).update(pedidoEnc, '*');
