@@ -18,10 +18,10 @@ export default class PedidoService {
 
       await knex('MovimientosDet').insert(pedidoDet, '*');
 
-      if (pedidoEnc.EstadoMovimientoID === 3) {
+      if (pedidoEnc.estadomovimientoid === 3) {
         await trx('Clientes')
-          .where({ ClienteID: pedidoEnc.ClienteID })
-          .update({ FechaUltimaCompra: pedidoEnc.Fecha }, '*');
+          .where({ ClienteID: pedidoEnc.clienteid })
+          .update({ FechaUltimaCompra: pedidoEnc.fecha }, '*');
       }
     });
 
@@ -38,17 +38,16 @@ export default class PedidoService {
     pedidoDet.forEach((item) => {
       item.movimientoencid = pedidoId;
     });
-    console.log('pedidoEnc', pedidoEnc);
 
     await knex.transaction(async (trx) => {
       await trx('MovimientosEnc').where({ MovimientoEncID: pedidoId }).update(pedidoEnc, '*');
 
       await this.mergeItems(trx, pedidoId, pedidoDet);
 
-      if (pedidoEnc.EstadoMovimientoID === 3) {
+      if (pedidoEnc.estadomovimientoid === 3) {
         await trx('Clientes')
-          .where({ ClienteID: pedidoEnc.ClienteID })
-          .update({ FechaUltimaCompra: pedidoEnc.Fecha }, '*');
+          .where({ ClienteID: pedidoEnc.clienteid })
+          .update({ FechaUltimaCompra: pedidoEnc.fecha }, '*');
       }
     });
   };
