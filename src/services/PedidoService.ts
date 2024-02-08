@@ -8,6 +8,7 @@ export default class PedidoService {
     let pedidoId = null;
     const pedidoEnc = omit(['items'], pedido);
     pedidoEnc.fecha = moment(pedidoEnc.fecha, 'DD-MM-YYYY').format('YYYY-MM-DD');
+    pedidoEnc.observaciones = !pedidoEnc.observaciones ? null : pedidoEnc.observaciones;
     const pedidoDet = pedido.items.map((item) => formatKeys(omit(['precio'], item)));
     await knex.transaction(async (trx) => {
       const newPedidoEnc = (await knex('MovimientosEnc').insert(pedidoEnc, '*'))[0];
@@ -31,6 +32,7 @@ export default class PedidoService {
   public static updatePedido = async (pedidoId, pedido) => {
     const pedidoEnc = omit(['movimientoencid', 'items', 'createdat'], pedido);
     pedidoEnc.fecha = moment(pedidoEnc.fecha, 'DD-MM-YYYY').format('YYYY-MM-DD');
+    pedidoEnc.observaciones = !pedidoEnc.observaciones ? null : pedidoEnc.observaciones;
     const pedidoDet = pedido.items.map((item) =>
       formatKeys(omit(['movimiento_det_id', 'precio'], item))
     );
