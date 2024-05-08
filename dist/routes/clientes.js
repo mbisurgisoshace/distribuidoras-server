@@ -243,14 +243,11 @@ router.get('/:cliente_id(\\d+)', helpers_1.default.ensureAuthenticated, helpers_
     try {
         //const cliente = await knex('Clientes').where({ ClienteID: cliente_id }).first();
         const cliente = yield (0, connection_1.default)('Clientes')
-            .select([
-            'Clientes.*',
-            'Canales.CanalNombre',
-            'ZonasSub.SubZonaNombre'
-        ])
+            .select(['Clientes.*', 'Canales.CanalNombre', 'ZonasSub.SubZonaNombre'])
             .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
             .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
-            .where({ ClienteID: cliente_id }).first();
+            .where({ ClienteID: cliente_id })
+            .first();
         res.status(200).json((0, utils_1.camelizeKeys)(cliente));
     }
     catch (err) {
@@ -313,7 +310,7 @@ router.get('/:cliente_id(\\d+)/lastPedidos', helpers_1.default.ensureAuthenticat
 }));
 router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const values = (0, utils_1.formatKeys)(req.body, 'cliente_id');
-    //values.estado = true;
+    values.estado = true;
     try {
         const cliente = (yield (0, connection_1.default)('Clientes').insert(values, '*', { includeTriggerModifications: true }))[0];
         AuditoriaService_1.default.log('clientes', cliente.ClienteID, JSON.stringify(cliente), 'insert', req.user.username);

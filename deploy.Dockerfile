@@ -1,4 +1,4 @@
-FROM node:10 as builder
+FROM node:16 as builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN npm install -g nodemon typescript && \
   yarn install --ignore-engines
 RUN yarn build
 
-FROM node:10-slim
+FROM node:16-slim
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y gnupg2 \
 #   && mkdir -p /home/pptruser/Downloads \
 #   && chown -R pptruser:pptruser /home/pptruser \
 #   && chown -R pptruser:pptruser /app
-RUN echo "deb http://deb.debian.org/debian jessie main\ndeb http://security.debian.org jessie/updates main" > /etc/apt/sources.list \
+RUN echo "deb http://archive.debian.org/debian jessie main\ndeb http://security.debian.org jessie/updates main" > /etc/apt/sources.list \
   && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
   # && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
   && apt-get update \

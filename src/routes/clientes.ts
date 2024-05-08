@@ -68,7 +68,7 @@ router.get(
           .orWhereRaw('Telefono like ?', [`%${search}%`])
           .orWhereRaw('ClienteID like ?', [`%${search}%`])
           .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
-          .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
+          .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
       }
 
       res.status(200).send(camelizeKeys(clientes));
@@ -310,14 +310,11 @@ router.get(
     try {
       //const cliente = await knex('Clientes').where({ ClienteID: cliente_id }).first();
       const cliente = await knex('Clientes')
-        .select([
-          'Clientes.*',
-          'Canales.CanalNombre',
-          'ZonasSub.SubZonaNombre'
-        ])
+        .select(['Clientes.*', 'Canales.CanalNombre', 'ZonasSub.SubZonaNombre'])
         .leftOuterJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
         .leftOuterJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID')
-        .where({ ClienteID: cliente_id }).first();
+        .where({ ClienteID: cliente_id })
+        .first();
       res.status(200).json(camelizeKeys(cliente));
     } catch (err) {
       next(err);
@@ -437,7 +434,7 @@ router.post(
   authHelpers.ensureIsUser,
   async (req, res, next) => {
     const values: any = formatKeys(req.body, 'cliente_id');
-    //values.estado = true;
+    values.estado = true;
 
     try {
       const cliente = (
