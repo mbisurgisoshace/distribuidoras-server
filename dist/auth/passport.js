@@ -16,7 +16,7 @@ const connection_1 = require("../db/connection");
 const helpers_1 = require("./helpers");
 let opts = {
     jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderWithScheme('JWT'),
-    secretOrKey: process.env.TOKEN_SECRET
+    secretOrKey: process.env.TOKEN_SECRET,
 };
 passport.use(new passport_jwt_1.Strategy(opts, (jwt_payload, done) => __awaiter(void 0, void 0, void 0, function* () {
     try {
