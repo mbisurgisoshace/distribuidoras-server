@@ -50,7 +50,7 @@ router.get(
       }));
 
       const queriesPromises = performQueries.map((query) => {
-        if (query.table === 'zonas') return knex(query.table).select('*').where('habilitado', 1);
+        if (query.table === 'zonas') return knex(query.table).select('*').where('habilitado', true);
 
         return knex(query.table).select('*');
       });
