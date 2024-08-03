@@ -44,7 +44,7 @@ router.get('/movimiento/:movimiento_enc_id', helpers_1.default.ensureAuthenticat
             MovimientoEncID: movimiento.MovimientoEncID,
         });
         movimiento.items = (0, utils_1.camelizeKeys)(items);
-        movimiento.items = movimiento.items.map(item => (Object.assign(Object.assign({}, item), { precio: item.monto / item.cantidad })));
+        movimiento.items = movimiento.items.map((item) => (Object.assign(Object.assign({}, item), { precio: item.monto / item.cantidad })));
         res.status(200).json((0, utils_1.camelizeKeys)(movimiento));
     }
     catch (err) {
@@ -121,10 +121,26 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
         let innerResult = ((yield query) || [])
             .map((res) => res.MovimientoEncID)
             .filter((val) => val);
-        const result = yield (0, connection_1.default)('viewMonitor')
+        const pedidos = yield (0, connection_1.default)('viewMonitor2')
             .whereIn('MovimientoEncID', innerResult)
             .timeout(30000);
-        res.send(result);
+        const itemsPedido = yield (0, connection_1.default)('MovimientosDet')
+            .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
+            .whereIn('MovimientoEncID', pedidos.map((pedido) => pedido.MovimientoEncID));
+        const pedidosConDetalle = pedidos.map((pedido) => {
+            let detalle = '';
+            const items = itemsPedido.filter((item) => item.MovimientoEncID === pedido.MovimientoEncID);
+            items.forEach((item) => {
+                let precio = '-';
+                if (item.Monto && item.Cantidad) {
+                    precio = (item.Monto / item.Cantidad).toFixed(2);
+                }
+                detalle += `${item.EnvaseNombre}*${item.Cantidad}*${precio};`;
+                console.log('detalle', detalle);
+            });
+            return Object.assign(Object.assign({}, pedido), { Detalle: detalle });
+        });
+        res.send(pedidosConDetalle);
     }
     catch (err) {
         next(err);

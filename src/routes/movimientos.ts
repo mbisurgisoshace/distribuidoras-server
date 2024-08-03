@@ -45,15 +45,15 @@ router.get(
       const movimiento = await knex('MovimientosEnc')
         .where({ MovimientoEncID: movimiento_enc_id })
         .first();
-      movimiento.fecha = moment(movimiento.Fecha).utc().format('DD-MM-YYYY')
+      movimiento.fecha = moment(movimiento.Fecha).utc().format('DD-MM-YYYY');
       const items = await knex('MovimientosDet').where({
         MovimientoEncID: movimiento.MovimientoEncID,
       });
       movimiento.items = camelizeKeys(items);
-      movimiento.items = movimiento.items.map(item => ({
+      movimiento.items = movimiento.items.map((item) => ({
         ...item,
-        precio: item.monto / item.cantidad
-      }))
+        precio: item.monto / item.cantidad,
+      }));
       res.status(200).json(camelizeKeys(movimiento));
     } catch (err) {
       console.log('err', err);
@@ -156,11 +156,38 @@ router.post(
         .map((res: any) => res.MovimientoEncID)
         .filter((val) => val);
 
-      const result = await knex('viewMonitor')
+      const pedidos = await knex('viewMonitor2')
         .whereIn('MovimientoEncID', innerResult)
         .timeout(30000);
 
-      res.send(result);
+      const itemsPedido = await knex('MovimientosDet')
+        .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
+        .whereIn(
+          'MovimientoEncID',
+          pedidos.map((pedido) => pedido.MovimientoEncID)
+        );
+
+      const pedidosConDetalle = pedidos.map((pedido) => {
+        let detalle = '';
+        const items = itemsPedido.filter((item) => item.MovimientoEncID === pedido.MovimientoEncID);
+
+        items.forEach((item) => {
+          let precio = '-';
+
+          if (item.Monto && item.Cantidad) {
+            precio = (item.Monto / item.Cantidad).toFixed(2);
+          }
+
+          detalle += `${item.EnvaseNombre}*${item.Cantidad}*${precio};`;
+        });
+
+        return {
+          ...pedido,
+          Detalle: detalle,
+        };
+      });
+
+      res.send(pedidosConDetalle);
     } catch (err) {
       next(err);
     }
@@ -178,7 +205,7 @@ router.post(
       //const movimiento = (await knex('MovimientosEnc').insert(values, '*'))[0];
       const newPedidoId = await PedidoService.insertarPedido(values);
       if (!newPedidoId) {
-        throw new Error('Ha ocurrido un error al generar el pedido.')
+        throw new Error('Ha ocurrido un error al generar el pedido.');
       }
 
       res.status(200).json(newPedidoId);
