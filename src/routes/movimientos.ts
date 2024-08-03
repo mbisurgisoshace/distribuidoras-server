@@ -168,6 +168,7 @@ router.post(
         );
 
       const pedidosConDetalle = pedidos.map((pedido) => {
+        let total = 0;
         let detalle = '';
         const items = itemsPedido.filter((item) => item.MovimientoEncID === pedido.MovimientoEncID);
 
@@ -175,6 +176,7 @@ router.post(
           let precio = '-';
 
           if (item.Monto && item.Cantidad) {
+            total = item.Monto;
             precio = (item.Monto / item.Cantidad).toFixed(2);
           }
 
@@ -183,6 +185,7 @@ router.post(
 
         return {
           ...pedido,
+          Total: total,
           Detalle: detalle,
         };
       });
