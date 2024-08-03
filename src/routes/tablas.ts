@@ -49,7 +49,11 @@ router.get(
         table: TABLES_MAP[table],
       }));
 
-      const queriesPromises = performQueries.map((query) => knex(query.table).select('*'));
+      const queriesPromises = performQueries.map((query) => {
+        if (query.table === 'zonas') return knex(query.table).select('*').where('habilitado', true);
+
+        return knex(query.table).select('*');
+      });
 
       const promisesResult = await Promise.all(queriesPromises);
 

@@ -17,17 +17,19 @@ const passport = require('../auth/passport');
 router.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     passport.authenticate('local', (err, user, info) => {
         if (err) {
-            handleResponse(res, 500, { error: err });
+            console.log('err', err);
+            return handleResponse(res, 500, { error: err });
         }
         if (!user) {
-            handleResponse(res, 401, { error: info });
+            console.log('ono user', info);
+            return handleResponse(res, 401, { error: info });
         }
         if (user) {
             const userObj = R.omit(['password', 'token'], user);
             res.status(200).json({
                 status: 'success',
                 user: userObj,
-                token: user.token
+                token: user.token,
             });
         }
     })(req, res, next);
@@ -42,7 +44,7 @@ router.post('/signup', (req, res, next) => __awaiter(void 0, void 0, void 0, fun
                 res.status(200).json({
                     status: 'success',
                     user: userObj,
-                    token: token
+                    token: token,
                 });
             }
         })(req, res, next);
