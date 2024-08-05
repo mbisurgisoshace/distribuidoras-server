@@ -176,7 +176,7 @@ router.post(
           let precio = '-';
 
           if (item.Monto && item.Cantidad) {
-            total = item.Monto;
+            total = total + item.Monto;
             precio = (item.Monto / item.Cantidad).toFixed(2);
           }
 
