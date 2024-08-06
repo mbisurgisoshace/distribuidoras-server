@@ -11,6 +11,7 @@ import hojas from './routes/hojas';
 import zonas from './routes/zonas';
 import tablas from './routes/tablas';
 import cargas from './routes/cargas';
+import mobile from './routes/mobile';
 import precios from './routes/precios';
 import envases from './routes/envases';
 import motivos from './routes/motivos';
@@ -67,6 +68,7 @@ class App {
     this.express.use('/hojas', hojas);
     this.express.use('/zonas', zonas);
     this.express.use('/tango', tango);
+    this.express.use('/mobile', mobile);
     this.express.use('/tablas', tablas);
     this.express.use('/cargas', cargas);
     this.express.use('/precios', precios);

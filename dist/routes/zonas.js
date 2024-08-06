@@ -16,7 +16,7 @@ const utils_1 = require("../utils/utils");
 const router = express.Router();
 router.get('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const zonas = yield (0, connection_1.default)('Zonas').select('*');
+        const zonas = yield (0, connection_1.default)('Zonas').select('*').where('habilitado', true);
         res.status(200).json((0, utils_1.camelizeKeys)(zonas));
     }
     catch (err) {

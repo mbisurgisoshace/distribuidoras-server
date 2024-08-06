@@ -128,17 +128,18 @@ router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.
             .innerJoin('Envases', 'Envases.EnvaseID', 'MovimientosDet.EnvaseID')
             .whereIn('MovimientoEncID', pedidos.map((pedido) => pedido.MovimientoEncID));
         const pedidosConDetalle = pedidos.map((pedido) => {
+            let total = 0;
             let detalle = '';
             const items = itemsPedido.filter((item) => item.MovimientoEncID === pedido.MovimientoEncID);
             items.forEach((item) => {
                 let precio = '-';
                 if (item.Monto && item.Cantidad) {
+                    total = total + item.Monto;
                     precio = (item.Monto / item.Cantidad).toFixed(2);
                 }
                 detalle += `${item.EnvaseNombre}*${item.Cantidad}*${precio};`;
-                console.log('detalle', detalle);
             });
-            return Object.assign(Object.assign({}, pedido), { Detalle: detalle });
+            return Object.assign(Object.assign({}, pedido), { Total: total, Detalle: detalle });
         });
         res.send(pedidosConDetalle);
     }
