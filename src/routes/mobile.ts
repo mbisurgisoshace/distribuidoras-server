@@ -1,5 +1,6 @@
 import * as moment from 'moment';
 import * as express from 'express';
+import { v4 as uuidv4 } from 'uuid';
 
 import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
@@ -97,7 +98,7 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         idMotivo: pedido.MotivoID,
         estado: getEstadoPedido(pedido.EstadoMovimientoNombre),
         items: items.map((item) => ({
-          id: item.MovimientoDetID,
+          id: uuidv4(),
           idProducto: item.EnvaseID,
           cantidad: item.Cantidad,
           precio: parseFloat((item.Monto / item.Cantidad).toFixed(2)),
