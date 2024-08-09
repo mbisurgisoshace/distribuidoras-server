@@ -108,7 +108,7 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         reclamo: pedido.Reclamo,
         orden: pedido.Orden,
         observaciones: pedido.Observaciones,
-        sincronizado: pedido.Sincronizado,
+        //sincronizado: pedido.Sincronizado,
       };
     });
 
