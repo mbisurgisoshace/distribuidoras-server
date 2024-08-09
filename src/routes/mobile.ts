@@ -84,6 +84,8 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         cliente: {
           id: cliente.ClienteID,
           telefono: cliente.telefono,
+          latitud: cliente.Latitud,
+          longitud: cliente.Longitud,
           codigoCliente: cliente.ClienteID.toString(),
           razonSocial: cliente.RazonSocial,
           direccion: `${cliente.Calle} ${cliente.Altura}`,
