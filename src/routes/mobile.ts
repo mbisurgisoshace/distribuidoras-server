@@ -82,6 +82,7 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         id: pedido.MovimientoEncID,
         cliente: {
           id: cliente.ClienteID,
+          telefono: cliente.telefono,
           codigoCliente: cliente.ClienteID.toString(),
           razonSocial: cliente.RazonSocial,
           direccion: `${cliente.Calle} ${cliente.Altura}`,
