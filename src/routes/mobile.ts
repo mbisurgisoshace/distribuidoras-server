@@ -93,6 +93,7 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         idCondicionVenta: pedido.CondicionVentaID,
         condicionVenta: pedido.CondicionVentaNombre,
         idEstado: pedido.EstadoMovimientoID,
+        idMotivo: pedido.MotivoID,
         estado: getEstadoPedido(pedido.EstadoMovimientoNombre),
         items: items.map((item) => ({
           id: item.MovimientoDetID,
@@ -102,6 +103,9 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
         })),
         visito: pedido.Visito,
         vendio: pedido.Vendio,
+        reclamo: pedido.Reclamo,
+        orden: pedido.Orden,
+        observaciones: pedido.Observaciones,
         sincronizado: pedido.Sincronizado,
       };
     });
