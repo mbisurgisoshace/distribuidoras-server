@@ -118,6 +118,42 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
   }
 });
 
+router.put('/:choferId/pedidos', async (req, res, next) => {
+  try {
+    const pedidos = req.body;
+
+    await knex.transaction(async (trx) => {
+      for (let i = 0; i < pedidos.length; i++) {
+        const pedido = pedidos[i];
+
+        await trx('MovimientosEnc').where({ MovimientoEncID: pedido.id }).update({
+          EstadoMovimientoID: pedido.idEstado,
+          MotivoID: pedido.idMotivo,
+          Visito: pedido.visito,
+          Vendio: pedido.vendio,
+        });
+
+        await trx('MovimientosDet').where({ MovimientoEncID: pedido.id }).delete();
+
+        for (let j = 0; j < pedido.items.length; j++) {
+          const item = pedido.items[j];
+
+          await trx('MovimientosDet').insert({
+            MovimientoEncID: pedido.id,
+            EnvaseID: item.idProducto,
+            Cantidad: item.cantidad,
+            Monto: item.cantidad * item.precio,
+          });
+        }
+      }
+    });
+
+    res.status(200).json('Ok');
+  } catch (err) {
+    next(err);
+  }
+});
+
 const getEstadoPedido = (estado: string) => {
   if (estado === 'Entregado') return 'Entregado';
   if (estado === 'No Entregado') return 'No Entregado';
