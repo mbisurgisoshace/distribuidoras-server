@@ -61,7 +61,9 @@ router.get('/fecha/:fecha', helpers_1.default.ensureAuthenticated, helpers_1.def
 router.get('/estado/:estado', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const estado = req.params.estado;
     try {
-        const hojas = yield (0, connection_1.default)('HojasRuta').select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido').where({ Estado: estado })
+        const hojas = yield (0, connection_1.default)('HojasRuta')
+            .select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido')
+            .where({ Estado: estado })
             .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID');
         res.status(200).json((0, utils_1.camelizeKeys)(hojas));
     }
@@ -121,6 +123,27 @@ router.post('/:hoja_id/movimientos', helpers_1.default.ensureAuthenticated, help
         const movimientos = yield (0, connection_1.default)('MovimientosEnc').insert(values, '*');
         //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
         res.status(200).json(movimientos || {});
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.post('/search', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const filters = req.body;
+    try {
+        let query = (0, connection_1.default)('HojasRuta')
+            .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
+            .leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
+            .orderBy('HojasRuta.HojaRutaID');
+        if (filters.desde && filters.hasta) {
+            const desde = moment(filters.desde, 'DD-MM-YYYY').format('YYYY-MM-DD');
+            const hasta = moment(filters.hasta, 'DD-MM-YYYY').format('YYYY-MM-DD');
+            query = query.andWhere(function () {
+                this.andWhere('HojasRuta.Fecha', '>=', desde).andWhere('HojasRuta.Fecha', '<=', hasta);
+            });
+        }
+        const hojas = (yield query) || [];
+        res.send(hojas);
     }
     catch (err) {
         next(err);

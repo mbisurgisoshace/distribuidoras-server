@@ -76,7 +76,9 @@ router.get(
     const estado = req.params.estado;
 
     try {
-      const hojas = await knex('HojasRuta').select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido').where({ Estado: estado })
+      const hojas = await knex('HojasRuta')
+        .select('HojasRuta.*', 'Choferes.Nombre', 'Choferes.Apellido')
+        .where({ Estado: estado })
         .innerJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID');
       res.status(200).json(camelizeKeys(hojas));
     } catch (err) {
@@ -174,6 +176,36 @@ router.post(
       const movimientos = await knex('MovimientosEnc').insert(values, '*');
       //AuditoriaService.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
       res.status(200).json(movimientos || {});
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  '/search',
+  authHelpers.ensureAuthenticated,
+  authHelpers.ensureIsUser,
+  async (req, res, next) => {
+    const filters = req.body;
+
+    try {
+      let query = knex('HojasRuta')
+        .select('HojasRuta.*', 'Choferes.Apellido', 'Choferes.Nombre')
+        .leftOuterJoin('Choferes', 'Choferes.ChoferID', 'HojasRuta.ChoferID')
+        .orderBy('HojasRuta.HojaRutaID');
+
+      if (filters.desde && filters.hasta) {
+        const desde = moment(filters.desde, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        const hasta = moment(filters.hasta, 'DD-MM-YYYY').format('YYYY-MM-DD');
+        query = query.andWhere(function () {
+          this.andWhere('HojasRuta.Fecha', '>=', desde).andWhere('HojasRuta.Fecha', '<=', hasta);
+        });
+      }
+
+      const hojas = (await query) || [];
+
+      res.send(hojas);
     } catch (err) {
       next(err);
     }
