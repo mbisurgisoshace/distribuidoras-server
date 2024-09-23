@@ -33,7 +33,7 @@ router.get('/:choferId/pedidos', async (req, res, next) => {
   try {
     const hoja = await knex('HojasRuta')
       .select('*')
-      .where({ ChoferID: choferId, Fecha: today })
+      .where({ ChoferID: choferId, Fecha: today, Estado: true })
       .first();
 
     const pedidos = await knex('MovimientosEnc')
