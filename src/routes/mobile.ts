@@ -135,6 +135,14 @@ router.put('/:choferId/pedidos', async (req, res, next) => {
           Vendio: pedido.vendio,
         });
 
+        if (pedido.idEstado === 3) {
+          await trx('Clientes')
+            .where({ ClienteID: pedido.cliente.id })
+            .update({
+              FechaUltimaCompra: moment().format('YYYY-MM-DD'),
+            });
+        }
+
         await trx('MovimientosDet').where({ MovimientoEncID: pedido.id }).delete();
 
         for (let j = 0; j < pedido.items.length; j++) {
