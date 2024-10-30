@@ -136,7 +136,7 @@ router.post(
               Efectivo: 0,
               Estado: true,
               CierreStock: false,
-              ControlStocl: false,
+              ControlStock: false,
               CierreMobile: false,
             },
             '*'
