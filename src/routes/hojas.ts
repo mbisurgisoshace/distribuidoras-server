@@ -134,6 +134,10 @@ router.post(
               Cobranza: 0,
               Cheques: 0,
               Efectivo: 0,
+              Estado: true,
+              CierreStock: false,
+              ControlStocl: false,
+              CierreMobile: false,
             },
             '*'
           )
