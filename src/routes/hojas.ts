@@ -142,6 +142,8 @@ router.post(
             '*'
           )
         )[0];
+        console.log('hoja', hoja);
+
         const HojaRutaID = hoja.HojaRutaID;
 
         for (let i = 0; i < clientes.length; i++) {
@@ -154,18 +156,20 @@ router.post(
             CondicionVentaID: cliente.condicion_venta_id,
             TipoMovimientoID: 1,
             EstadoMovimientoID: 1,
+            Visito: false,
+            Vendio: false,
           };
           await trx('MovimientosEnc').insert(movimientoEnc);
         }
-      });
 
-      AuditoriaService.log(
-        'hojas de ruta',
-        hoja.HojaRutaID,
-        JSON.stringify(hoja),
-        'insert',
-        req.user.username
-      );
+        AuditoriaService.log(
+          'hojas de ruta',
+          hoja.HojaRutaID,
+          JSON.stringify(hoja),
+          'insert',
+          req.user.username
+        );
+      });
       res.status(200).json(camelizeKeys(hoja));
     } catch (err) {
       next(err);

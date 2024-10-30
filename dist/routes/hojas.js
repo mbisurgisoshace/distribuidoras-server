@@ -82,6 +82,34 @@ router.post('/', helpers_1.default.ensureAuthenticated, helpers_1.default.ensure
         next(err);
     }
 }));
+router.post('/abrir', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const values = (0, utils_1.formatKeys)(req.body.hojaRuta);
+    const clientes = req.body.clientes;
+    try {
+        yield connection_1.default.transaction((trx) => __awaiter(void 0, void 0, void 0, function* () {
+            const hoja = (yield trx('HojasRuta').insert(Object.assign(Object.assign({}, values), { KmFinal: 0, VentaContado: 0, VentaCtacte: 0, VentaTarjeta: 0, GastoCombustible: 0, GastoViatico: 0, GastoOtro: 0, Cobranza: 0, Cheques: 0, Efectivo: 0, Estado: true, CierreStock: false, ControlStock: false, CierreMobile: false }), '*'))[0];
+            console.log('hoja', hoja);
+            const HojaRutaID = hoja.HojaRutaID;
+            for (let i = 0; i < clientes.length; i++) {
+                const cliente = clientes[i];
+                const movimientoEnc = {
+                    Fecha: hoja.Fecha,
+                    ClienteID: cliente.cliente_id,
+                    HojaRutaID,
+                    CondicionVentaID: cliente.condicion_venta_id,
+                    TipoMovimientoID: 1,
+                    EstadoMovimientoID: 1,
+                };
+                yield trx('MovimientosEnc').insert(movimientoEnc);
+            }
+        }));
+        AuditoriaService_1.default.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
+        res.status(200).json((0, utils_1.camelizeKeys)(hoja));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     let values = (0, utils_1.formatKeys)(req.body, 'hoja_ruta_id');
