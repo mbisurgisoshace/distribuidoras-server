@@ -110,6 +110,48 @@ router.post(
   }
 );
 
+router.post(
+  '/abrir',
+  authHelpers.ensureAuthenticated,
+  authHelpers.ensureIsUser,
+  async (req, res, next) => {
+    const values = formatKeys(req.body.hojaRuta);
+    const clientes = req.body.clientes;
+
+    try {
+      await knex.transaction(async (trx) => {
+        const hoja = (await trx('HojasRuta').insert(values, '*'))[0];
+        const HojaRutaID = hoja.HojaRutaID;
+
+        await Promise.all(
+          clientes.map(async (cliente) => {
+            const movimientoEnc = {
+              Fecha: hoja.Fecha,
+              ClienteID: cliente.cliente_id,
+              HojaRutaID,
+              CondicionVentaID: cliente.condicion_venta_id,
+              TipoMovimientoID: 1,
+              EstadoMovimientoID: 1,
+            };
+            await trx('MovimientosEnc').insert(values);
+          })
+        );
+      });
+
+      AuditoriaService.log(
+        'hojas de ruta',
+        hoja.HojaRutaID,
+        JSON.stringify(hoja),
+        'insert',
+        req.user.username
+      );
+      res.status(200).json(camelizeKeys(hoja));
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.put(
   '/:hoja_id',
   authHelpers.ensureAuthenticated,
