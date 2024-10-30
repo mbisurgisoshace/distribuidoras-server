@@ -120,7 +120,24 @@ router.post(
 
     try {
       await knex.transaction(async (trx) => {
-        const hoja = (await trx('HojasRuta').insert(values, '*'))[0];
+        const hoja = (
+          await trx('HojasRuta').insert(
+            {
+              ...values,
+              KmFinal: 0,
+              VentaContado: 0,
+              VentaCtacte: 0,
+              VentaTarjeta: 0,
+              GastoCombustible: 0,
+              GastoViatico: 0,
+              GastoOtro: 0,
+              Cobranza: 0,
+              Cheques: 0,
+              Efectivo: 0,
+            },
+            '*'
+          )
+        )[0];
         const HojaRutaID = hoja.HojaRutaID;
 
         await Promise.all(
