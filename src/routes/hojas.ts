@@ -155,7 +155,7 @@ router.post(
             TipoMovimientoID: 1,
             EstadoMovimientoID: 1,
           };
-          await trx('MovimientosEnc').insert(values);
+          await trx('MovimientosEnc').insert(movimientoEnc);
         }
       });
 
