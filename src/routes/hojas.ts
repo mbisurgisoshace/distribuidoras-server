@@ -144,19 +144,19 @@ router.post(
         )[0];
         const HojaRutaID = hoja.HojaRutaID;
 
-        await Promise.all(
-          clientes.map(async (cliente) => {
-            const movimientoEnc = {
-              Fecha: hoja.Fecha,
-              ClienteID: cliente.cliente_id,
-              HojaRutaID,
-              CondicionVentaID: cliente.condicion_venta_id,
-              TipoMovimientoID: 1,
-              EstadoMovimientoID: 1,
-            };
-            await trx('MovimientosEnc').insert(values);
-          })
-        );
+        for (let i = 0; i < clientes.length; i++) {
+          const cliente = clientes[i];
+
+          const movimientoEnc = {
+            Fecha: hoja.Fecha,
+            ClienteID: cliente.cliente_id,
+            HojaRutaID,
+            CondicionVentaID: cliente.condicion_venta_id,
+            TipoMovimientoID: 1,
+            EstadoMovimientoID: 1,
+          };
+          await trx('MovimientosEnc').insert(values);
+        }
       });
 
       AuditoriaService.log(
