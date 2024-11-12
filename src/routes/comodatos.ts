@@ -83,7 +83,7 @@ router.get(
         let comodato = comodatos[i];
         const detalle = await knex('ComodatosDet')
           .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
-          .where({ ComodatoEncID: comodato.ComodatoEncID });
+          .where({ ComodatoEncID: comodato.ComodatoEncID, Tipo: 'comodato' });
         comodato.items = camelizeKeys(detalle);
       }
 
