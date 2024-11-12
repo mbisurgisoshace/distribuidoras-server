@@ -77,13 +77,17 @@ router.get(
     const cliente_id = req.params.cliente_id;
 
     try {
-      const comodatos = await knex('ComodatosEnc').where({ ClienteID: cliente_id, vigente: true });
+      const comodatos = await knex('ComodatosEnc').where({
+        ClienteID: cliente_id,
+        vigente: true,
+        Tipo: 'comodato',
+      });
 
       for (let i = 0; i < comodatos.length; i++) {
         let comodato = comodatos[i];
         const detalle = await knex('ComodatosDet')
           .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
-          .where({ ComodatoEncID: comodato.ComodatoEncID, Tipo: 'comodato' });
+          .where({ ComodatoEncID: comodato.ComodatoEncID });
         comodato.items = camelizeKeys(detalle);
       }
 
