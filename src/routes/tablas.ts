@@ -19,6 +19,7 @@ const TABLES_MAP = {
   motivos: 'Motivos',
   envases: 'Envases',
   choferes: 'Choferes',
+  localidades: 'Localidades',
 };
 
 const QUERY_TABLES = [
