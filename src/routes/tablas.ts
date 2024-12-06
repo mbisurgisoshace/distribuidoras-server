@@ -34,6 +34,7 @@ const QUERY_TABLES = [
   'motivos',
   'envases',
   'choferes',
+  'localidades',
 ];
 
 router.get(
