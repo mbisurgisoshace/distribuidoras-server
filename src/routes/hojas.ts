@@ -218,6 +218,8 @@ router.delete(
     const hoja_id = req.params.hoja_id;
 
     try {
+      await knex('CargasEnc').where({ HojaRutaID: hoja_id }).delete();
+      await knex('MovimientosEnc').where({ HojaRutaID: hoja_id }).delete();
       const deletedHoja = await knex('HojasRuta').where({ HojaRutaID: hoja_id }).delete();
 
       if (deletedHoja) {

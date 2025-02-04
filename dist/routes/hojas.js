@@ -99,11 +99,13 @@ router.post('/abrir', helpers_1.default.ensureAuthenticated, helpers_1.default.e
                     CondicionVentaID: cliente.condicion_venta_id,
                     TipoMovimientoID: 1,
                     EstadoMovimientoID: 1,
+                    Visito: false,
+                    Vendio: false,
                 };
                 yield trx('MovimientosEnc').insert(movimientoEnc);
             }
+            AuditoriaService_1.default.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
         }));
-        AuditoriaService_1.default.log('hojas de ruta', hoja.HojaRutaID, JSON.stringify(hoja), 'insert', req.user.username);
         res.status(200).json((0, utils_1.camelizeKeys)(hoja));
     }
     catch (err) {
@@ -132,6 +134,8 @@ router.put('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default
 router.delete('/:hoja_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const hoja_id = req.params.hoja_id;
     try {
+        yield (0, connection_1.default)('CargasEnc').where({ HojaRutaID: hoja_id }).delete();
+        yield (0, connection_1.default)('MovimientosEnc').where({ HojaRutaID: hoja_id }).delete();
         const deletedHoja = yield (0, connection_1.default)('HojasRuta').where({ HojaRutaID: hoja_id }).delete();
         if (deletedHoja) {
             res.status(200).json(`Hoja Ruta ID: ${hoja_id} eliminado satisfactoriamente`);

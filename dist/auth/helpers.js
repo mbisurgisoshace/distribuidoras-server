@@ -61,7 +61,7 @@ class AuthHelpers {
         const playload = {
             exp: moment().add(7, 'days').unix(),
             iat: moment().unix(),
-            sub: user.id
+            sub: user.id,
         };
         return jwt.encode(playload, process.env.TOKEN_SECRET);
     }
@@ -79,7 +79,7 @@ class AuthHelpers {
         if (!(req.headers && req.headers.authorization)) {
             return res.status(401).json({
                 status: 'Por favor inicie sesion',
-                redirect: 'login'
+                redirect: 'login',
             });
         }
         const header = req.headers.authorization.split(' ');
@@ -88,16 +88,18 @@ class AuthHelpers {
             if (err) {
                 return res.status(401).json({
                     status: err,
-                    redirect: 'login'
+                    redirect: 'login',
                 });
             }
             else {
                 try {
-                    const user = yield (0, connection_1.default)('Users').where({ id: parseInt(payload.sub) }).first();
+                    const user = yield (0, connection_1.default)('Users')
+                        .where({ id: parseInt(payload.sub) })
+                        .first();
                     if (!user) {
                         res.status(401).json({
                             status: 'El usuario no existe',
-                            redirect: 'login'
+                            redirect: 'login',
                         });
                         return;
                     }
@@ -106,7 +108,7 @@ class AuthHelpers {
                 }
                 catch (err) {
                     res.status(500).json({
-                        status: `error: ${err}`
+                        status: `error: ${err}`,
                     });
                 }
             }
@@ -120,7 +122,20 @@ class AuthHelpers {
         else {
             res.status(403).json({
                 status: 'El usuario no esta autorizado',
-                redirect: 'login'
+                redirect: 'login',
+            });
+            return;
+        }
+    }
+    static ensureIsAdmin(req, res, next) {
+        const user = req.user;
+        if (user.rol === 'admin') {
+            next();
+        }
+        else {
+            res.status(403).json({
+                status: 'El usuario no esta autorizado',
+                redirect: 'hojas',
             });
             return;
         }

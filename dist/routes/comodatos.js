@@ -59,11 +59,16 @@ router.get('/vigentes', helpers_1.default.ensureAuthenticated, helpers_1.default
 router.get('/cliente/:cliente_id', helpers_1.default.ensureAuthenticated, helpers_1.default.ensureIsUser, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const cliente_id = req.params.cliente_id;
     try {
-        const comodatos = yield (0, connection_1.default)('ComodatosEnc')
-            .where({ ClienteID: cliente_id, vigente: true });
+        const comodatos = yield (0, connection_1.default)('ComodatosEnc').where({
+            ClienteID: cliente_id,
+            vigente: true,
+            Tipo: 'comodato',
+        });
         for (let i = 0; i < comodatos.length; i++) {
             let comodato = comodatos[i];
-            const detalle = yield (0, connection_1.default)('ComodatosDet').where({ ComodatoEncID: comodato.ComodatoEncID });
+            const detalle = yield (0, connection_1.default)('ComodatosDet')
+                .innerJoin('Envases', 'ComodatosDet.EnvaseID', 'Envases.EnvaseID')
+                .where({ ComodatoEncID: comodato.ComodatoEncID });
             comodato.items = (0, utils_1.camelizeKeys)(detalle);
         }
         // if (comodato) {
@@ -117,7 +122,9 @@ router.post('/:comodato_enc_id/renovar', helpers_1.default.ensureAuthenticated, 
         comodato.items = (0, utils_1.camelizeKeys)(detalle);
         const newComodato = yield ComodatoService_1.default.insertarComodato(comodatoEnc, (0, utils_1.formatKeys)(comodatoDet.items));
         //await ComodatoService.insertarMovimientos(camelizeKeys(newComodato), camelizeKeys(newComodato.items), camelizeKeys(comodato.items));
-        yield (0, connection_1.default)('ComodatosEnc').update({ Vigente: false, Renovado: true, NroRenovacion: newComodato.NroComprobante }).where({ ComodatoEncID: comodato_enc_id });
+        yield (0, connection_1.default)('ComodatosEnc')
+            .update({ Vigente: false, Renovado: true, NroRenovacion: newComodato.NroComprobante })
+            .where({ ComodatoEncID: comodato_enc_id });
         res.status(200).json((0, utils_1.camelizeKeys)(newComodato));
     }
     catch (err) {
@@ -132,7 +139,8 @@ router.put('/renovar', helpers_1.default.ensureAuthenticated, helpers_1.default.
             let comodato = values[i];
             let comodatoId = comodato.comodato_enc_id;
             comodato = R.omit(['comodato_enc_id', 'items'], comodato);
-            yield (0, connection_1.default)('ComodatosEnc').update({
+            yield (0, connection_1.default)('ComodatosEnc')
+                .update({
                 ClienteID: comodato.cliente_id,
                 Fecha: comodato.fecha,
                 NroComprobante: comodato.nro_comprobante,
@@ -144,8 +152,9 @@ router.put('/renovar', helpers_1.default.ensureAuthenticated, helpers_1.default.
                 NroRenovacion: comodato.nro_renovacion,
                 Observaciones: comodato.observaciones,
                 ChoferID: comodato.chofer_id,
-                Tipo: comodato.tipo
-            }).where({ ComodatoEncID: comodatoId });
+                Tipo: comodato.tipo,
+            })
+                .where({ ComodatoEncID: comodatoId });
         }
         res.status(200).json('Ok');
     }
