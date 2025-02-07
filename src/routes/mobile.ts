@@ -1,6 +1,7 @@
-import * as moment from 'moment';
+// import * as moment from 'moment';
 import * as express from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import * as moment from 'moment-timezone';
 
 import knex from '../db/connection';
 import authHelpers from '../auth/helpers';
@@ -28,7 +29,8 @@ router.get('/productos', async (req, res, next) => {
 
 router.get('/:choferId/pedidos', async (req, res, next) => {
   const choferId = req.params.choferId;
-  const today = moment().format('YYYY-MM-DD');
+  console.log('today', moment().tz('America/Buenos_Aires'));
+  const today = moment().tz('America/Buenos_Aires').format('YYYY-MM-DD');
 
   try {
     const hoja = await knex('HojasRuta')
