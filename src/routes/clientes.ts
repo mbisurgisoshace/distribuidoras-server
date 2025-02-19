@@ -42,19 +42,31 @@ router.get(
           const search = queryString.substring(3, queryString.length);
 
           if (filter === 'a') {
-            clientes = await knex('Clientes').whereRaw('Altura like ?', [`%${search}%`]);
+            clientes = await knex('Clientes')
+              .whereRaw('Altura like ?', [`%${search}%`])
+              .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+              .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
           }
 
           if (filter === 'c') {
-            clientes = await knex('Clientes').whereRaw('Calle like ?', [`%${search}%`]);
+            clientes = await knex('Clientes')
+              .whereRaw('Calle like ?', [`%${search}%`])
+              .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+              .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
           }
 
           if (filter === 'r') {
-            clientes = await knex('Clientes').whereRaw('RazonSocial like ?', [`%${search}%`]);
+            clientes = await knex('Clientes')
+              .whereRaw('RazonSocial like ?', [`%${search}%`])
+              .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+              .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
           }
 
           if (filter === 't') {
-            clientes = await knex('Clientes').whereRaw('Telefono like ?', [`%${search}%`]);
+            clientes = await knex('Clientes')
+              .whereRaw('Telefono like ?', [`%${search}%`])
+              .innerJoin('Canales', 'Canales.CanalID', 'Clientes.CanalID')
+              .innerJoin('ZonasSub', 'ZonasSub.SubZonaID', 'Clientes.ZonaSubID');
           }
         }
       }
